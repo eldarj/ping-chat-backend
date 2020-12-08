@@ -1,0 +1,32 @@
+server:
+  port: 8089
+
+service:
+  name: ping-authentication-service
+  static-directory-path: /home/${user.name}/application/${service.name}/static
+
+spring:
+  servlet:
+    multipart:
+      max-request-size: 15MB
+      max-file-size: 15MB
+  profiles:
+    active: production
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/ping_db?useSSL=true&serverTimezone=UTC
+    username: ping
+    password: ping
+
+  jpa:
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+      hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+
+    hibernate:
+      ddl-auto: update
+
+jwt:
+  secret: ultraProductinReadySecretKey
+  issuer: PingPlatform
