@@ -66,7 +66,7 @@ public class AuthenticationManager {
                     userEntity.getPhoneNumber());
         }
 
-        this.sendSmsTwoWayPin(userEntity);
+//        this.sendSmsTwoWayPin(userEntity);
 
         return objectMapper.convertValue(userEntity, converToUserType);
     }

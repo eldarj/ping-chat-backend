@@ -42,13 +42,17 @@ public class JwtTokenHandler {
                 .parseClaimsJws(bearerToken.replace("Bearer ", ""));
     }
 
+    public String getSubject(String bearerToken) {
+        return Jwts.parser()
+                .setSigningKey(secret)
+                .parseClaimsJws(bearerToken.replace("Bearer ", ""))
+                .getBody()
+                .getSubject();
+    }
+
     public boolean isValid(String bearerToken) {
         try {
-            Jws<Claims> jws = Jwts.parser()
-                    .setSigningKey(secret)
-                    .parseClaimsJws(bearerToken.replace("Bearer ", ""));
-
-            Claims claims = jws.getBody();
+            Claims claims = parse(bearerToken).getBody();
 
             boolean isValidIssuer = claims.getIssuer().equals(issuer);
             boolean isNotExpired = claims.getIssuedAt().before(claims.getExpiration());

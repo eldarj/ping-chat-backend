@@ -6,13 +6,13 @@ import com.pingchat.authenticationservice.data.mysql.entity.CountryCodeEntity;
 import com.pingchat.authenticationservice.data.mysql.repository.CountryCodeRepository;
 import com.pingchat.authenticationservice.model.CountryCodeDto;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
 
 @Slf4j
-@Component
+@Service
 public class CountryCodeDataService {
     private final CountryCodeRepository countryCodeRepository;
     private final ObjectMapper objectMapper;

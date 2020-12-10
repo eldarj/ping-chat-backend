@@ -2,8 +2,11 @@ package com.pingchat.authenticationservice.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pingchat.authenticationservice.auth.manager.AuthorizationManager;
+import com.pingchat.authenticationservice.auth.util.AuthenticationHolder;
+import com.pingchat.authenticationservice.data.mysql.entity.UserEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -45,11 +48,14 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         String token = httpRequest.getHeader("Authorization");
 
         if (!StringUtils.isBlank(token) && token.startsWith("Bearer ")) {
-            // TODO: Adjust this later, to store UserEntity in SecurityContextHolder, if needed
-            if (authorizationManager.authorizeByToken(token)) {
+            String userPhoneNumber = authorizationManager.authorizeByToken(token.replace("Bearer ", ""));
+            if (userPhoneNumber != null) {
+                SecurityContextHolder.getContext().setAuthentication(new AuthenticationHolder(userPhoneNumber));
                 chain.doFilter(httpRequest, httpResponse);
                 return;
             }
+
+
             log.warn("Bearer token invalid or expired.");
         } else {
             log.warn("Request doesn't contain Bearer token.");

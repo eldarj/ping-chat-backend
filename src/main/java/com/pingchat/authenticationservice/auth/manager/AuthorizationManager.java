@@ -1,6 +1,9 @@
 package com.pingchat.authenticationservice.auth.manager;
 
 import com.pingchat.authenticationservice.auth.util.JwtTokenHandler;
+import com.pingchat.authenticationservice.data.mysql.entity.UserEntity;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -13,8 +16,7 @@ public class AuthorizationManager {
         this.jwtTokenHandler = jwtTokenHandler;
     }
 
-    // TODO: Adjust this later, to return UserEntity and store in SecurityContextHolder, if needed
-    public boolean authorizeByToken(String token) {
-        return jwtTokenHandler.isValid(token);
+    public String authorizeByToken(String token) {
+        return jwtTokenHandler.getSubject(token);
     }
 }

@@ -28,6 +28,8 @@ public class UserEntity {
     private String firstName;
     private String lastName;
 
+    private boolean displayMyFullName = true;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "country_code_id")
     private CountryCodeEntity countryCode;

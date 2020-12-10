@@ -8,6 +8,7 @@ import com.pingchat.authenticationservice.model.UserDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.List;
 
@@ -28,8 +29,22 @@ public class UserDataService {
                 new TypeReference<>() {});
     }
 
+    public UserDto findById(long id) {
+        return objectMapper.convertValue(userRepository.findById(id), UserDto.class);
+    }
+
     public UserDto updateUser(UserDto userDto) {
         UserEntity userEntity = objectMapper.convertValue(userDto, UserEntity.class);
         return objectMapper.convertValue(userRepository.save(userEntity), UserDto.class);
+    }
+
+    @Transactional
+    public int updateFirstNameAndLastName(long userId, String firstName, String lastName) {
+        return userRepository.updateFirstNameAndLastName(userId, firstName, lastName);
+    }
+
+    @Transactional
+    public int updateProfileImage(long userId, String profileImageName) {
+        return userRepository.updateProfileImage(userId, profileImageName);
     }
 }

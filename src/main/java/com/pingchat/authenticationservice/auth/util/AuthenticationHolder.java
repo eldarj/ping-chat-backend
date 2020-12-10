@@ -1,6 +1,5 @@
 package com.pingchat.authenticationservice.auth.util;
 
-import com.pingchat.authenticationservice.data.mysql.entity.UserEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -8,25 +7,25 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class AuthenticationHolder implements Authentication {
-    private final UserEntity userEntity;
+    private final String phoneNumber;
 
-    public AuthenticationHolder(UserEntity userEntity) {
-        this.userEntity = userEntity;
+    public AuthenticationHolder(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     @Override
     public Object getDetails() {
-        return userEntity;
+        return phoneNumber;
     }
 
     @Override
     public Object getPrincipal() {
-        return this.userEntity.getCountryCode().getDialCode() + this.userEntity.getPhoneNumber();
+        return phoneNumber;
     }
 
     @Override
     public String getName() {
-        return this.userEntity.getFirstName() + " " + this.userEntity.getLastName();
+        return phoneNumber;
     }
 
     @Override
