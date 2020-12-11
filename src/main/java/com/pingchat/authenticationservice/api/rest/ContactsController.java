@@ -2,15 +2,15 @@ package com.pingchat.authenticationservice.api.rest;
 
 import com.pingchat.authenticationservice.auth.util.SecurityContextUserProvider;
 import com.pingchat.authenticationservice.model.ContactDto;
+import com.pingchat.authenticationservice.service.SmsService;
 import com.pingchat.authenticationservice.service.data.ContactDataService;
 import com.pingchat.authenticationservice.util.pagination.PagedSearchResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.SQLIntegrityConstraintViolationException;
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -19,8 +19,12 @@ import java.util.Map;
 public class ContactsController {
     private final ContactDataService contactDataService;
 
-    public ContactsController(ContactDataService contactDataService) {
+    private final SmsService smsService;
+
+    public ContactsController(ContactDataService contactDataService,
+                              SmsService smsService) {
         this.contactDataService = contactDataService;
+        this.smsService = smsService;
     }
 
     @GetMapping
@@ -48,11 +52,21 @@ public class ContactsController {
             response.put("contact", contactDataService.addContact(currentUserPhoneNumber, contactDto));
         } catch (DataIntegrityViolationException e) {
             response.put("error", "Kontakt već postoji.");
-        } catch (Exception e) {
-            String pox = "pox";
         }
 
         return response;
+    }
+
+    // TODO Include app download link
+    @PostMapping("invite")
+    public void inviteContact(@RequestBody String phoneNumber) throws IOException, InterruptedException {
+        String currentUserPhoneNumber = SecurityContextUserProvider.currentUserPrincipal();
+        phoneNumber = phoneNumber.replaceAll("\"", "");
+        smsService.sendSms(
+                String.format("Upravo ste dobili pozivnicu za Ping Chat od %s", currentUserPhoneNumber),
+                phoneNumber,
+                "PingChat"
+        );
     }
 
     @PostMapping("{contactId}/favourite")

@@ -20,5 +20,7 @@ public class ContactDto implements Serializable {
     private String contactPhoneNumber;
     private boolean isFavorite;
 
+    private boolean exists = contactUser != null;
+
     private Instant addedTimestamp = Instant.now();
 }
