@@ -53,8 +53,11 @@ public class ContactDataService {
 
     public ContactDto addContact(String userPhoneNumber, ContactDto contactDto) {
         ContactEntity contactEntity = objectMapper.convertValue(contactDto, ContactEntity.class);
-        contactEntity.setContactUser(userRepository.findByDialCodeAndPhoneNumber(contactDto.getContactPhoneNumber()));
         contactEntity.setUser(userRepository.findByDialCodeAndPhoneNumber(userPhoneNumber));
+
+        UserEntity contactUser = userRepository.findByDialCodeAndPhoneNumber(contactDto.getContactPhoneNumber());
+        contactEntity.setContactUser(contactUser);
+        contactEntity.setContactUserExists(contactUser != null);
 
         contactEntity = contactRepository.save(contactEntity);
 

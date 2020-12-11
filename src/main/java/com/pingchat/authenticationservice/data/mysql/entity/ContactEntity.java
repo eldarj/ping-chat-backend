@@ -37,6 +37,8 @@ public class ContactEntity {
 
     private boolean isFavorite;
 
+    private boolean contactUserExists;
+
     @NotNull
     private Instant addedTimestamp = Instant.now();
 }
