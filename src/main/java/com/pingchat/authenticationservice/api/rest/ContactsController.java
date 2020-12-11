@@ -24,13 +24,15 @@ public class ContactsController {
     }
 
     @GetMapping
-    public PagedSearchResult<ContactDto> findAll(Integer pageSize, Integer pageNumber, Long userId) {
+    public PagedSearchResult<ContactDto> findAll(Integer pageSize, Integer pageNumber,
+                                                 Long userId, Boolean favourites) {
         pageNumber = pageNumber - 1;
         PagedSearchResult<ContactDto> pagedContactDtos = contactDataService.findAllByFilter(pageSize,
-                pageNumber, userId);
+                pageNumber, userId, favourites);
 
-        log.info("Get paged contacts (pageSize={}, pageNumber={}, userId={}, returnedElements={}, totalElements={})",
-                pageSize, pageNumber, userId,
+        log.info("Get paged contacts (pageSize={}, pageNumber={}, userId={}, favourites={}, returnedElements={}, " +
+                        "totalElements={})",
+                pageSize, pageNumber, userId, favourites,
                 pagedContactDtos.getPage().size(),
                 pagedContactDtos.getTotalElements());
 
@@ -51,6 +53,15 @@ public class ContactsController {
         }
 
         return response;
+    }
+
+    @PostMapping("{contactId}/favourite")
+    public void updateFavouriteStatus(@PathVariable Long contactId, @RequestBody Boolean isFavourite) {
+        try {
+            contactDataService.setFavouriteStatus(contactId, isFavourite);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
 //    @GetMapping

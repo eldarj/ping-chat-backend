@@ -8,18 +8,17 @@ import com.pingchat.authenticationservice.data.mysql.repository.ContactRepositor
 import com.pingchat.authenticationservice.data.mysql.repository.UserRepository;
 import com.pingchat.authenticationservice.model.ContactDto;
 import com.pingchat.authenticationservice.util.pagination.PagedSearchResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.sql.Timestamp;
+import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ContactDataService {
     private final ContactRepository contactRepository;
@@ -40,10 +39,13 @@ public class ContactDataService {
                 .collect(Collectors.toList());
     }
 
-    public PagedSearchResult<ContactDto> findAllByFilter(Integer pageSize, Integer pageNumber, Long userId) {
+    public PagedSearchResult<ContactDto> findAllByFilter(Integer pageSize, Integer pageNumber, Long userId,
+                                                         boolean favourites) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-        Page<ContactEntity> pageOfContactEntities = contactRepository.findAllByUserId(userId, pageable);
+        Page<ContactEntity> pageOfContactEntities = favourites ?
+                contactRepository.findAllByUserIdAndIsFavoriteOrderByContactNameAsc(userId, favourites, pageable) :
+                contactRepository.findAllByUserIdOrderByContactNameAsc(userId, pageable);
 
         List<ContactDto> contactDtos = objectMapper.convertValue(pageOfContactEntities.getContent(), List.class);
         return new PagedSearchResult<>(contactDtos, pageOfContactEntities.getTotalElements());
@@ -57,6 +59,12 @@ public class ContactDataService {
         contactEntity = contactRepository.save(contactEntity);
 
         return objectMapper.convertValue(contactEntity, ContactDto.class);
+    }
+
+    @Transactional
+    public void setFavouriteStatus(Long contactId, Boolean isFavourite) {
+        log.info("Updating {} favourites status to {}", contactId, isFavourite);
+        contactRepository.updateFavouriteStatus(contactId, isFavourite);
     }
 
 
