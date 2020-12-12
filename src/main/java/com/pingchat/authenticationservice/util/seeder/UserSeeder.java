@@ -2,9 +2,11 @@ package com.pingchat.authenticationservice.util.seeder;
 
 import com.pingchat.authenticationservice.data.mysql.entity.ContactEntity;
 import com.pingchat.authenticationservice.data.mysql.entity.CountryCodeEntity;
+import com.pingchat.authenticationservice.data.mysql.entity.MessageEntity;
 import com.pingchat.authenticationservice.data.mysql.entity.UserEntity;
 import com.pingchat.authenticationservice.data.mysql.repository.ContactRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.CountryCodeRepository;
+import com.pingchat.authenticationservice.data.mysql.repository.MessageRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -15,12 +17,13 @@ import java.util.List;
 import java.util.Random;
 
 @Slf4j
-@Component
+@Component("userSeeder")
 @Profile("seeder")
 public class UserSeeder implements CommandLineRunner {
     private final CountryCodeRepository countryCodeRepository;
     private final UserRepository userRepository;
     private final ContactRepository contactRepository;
+    private final MessageRepository messageRepository;
 
     private final List<String> seedingFirstNames = List.of(
             "Alen", "Dino", "Admir", "Kenan","Berina","Emina", "Belma", "Samra",
@@ -52,10 +55,12 @@ public class UserSeeder implements CommandLineRunner {
 
     public UserSeeder(CountryCodeRepository countryCodeRepository,
                       UserRepository userRepository,
-                      ContactRepository contactRepository) {
+                      ContactRepository contactRepository,
+                      MessageRepository messageRepository) {
         this.userRepository = userRepository;
         this.countryCodeRepository = countryCodeRepository;
         this.contactRepository = contactRepository;
+        this.messageRepository = messageRepository;
     }
 
     @Override
@@ -93,6 +98,39 @@ public class UserSeeder implements CommandLineRunner {
 
             log.info("Saved user {}", savedUserEntity);
 
+            // Seed messages
+            ContactEntity contactEntity = new ContactEntity();
+            contactEntity.setUser(userEntity);
+            contactEntity.setContactUser(userEntity2);
+            contactEntity.setContactName(userEntity2.getFirstName());
+            contactEntity.setContactPhoneNumber(userEntity2.getCountryCode().getDialCode() + userEntity2.getPhoneNumber());
+            contactEntity.setContactUserExists(true);
+            contactEntity.setFavorite(true);
+
+            contactRepository.save(contactEntity);
+
+            ContactEntity contactEntity2 = new ContactEntity();
+            contactEntity2.setUser(userEntity2);
+            contactEntity2.setContactUser(userEntity);
+            contactEntity2.setContactName(userEntity.getFirstName());
+            contactEntity2.setContactPhoneNumber(userEntity.getCountryCode().getDialCode() + userEntity.getPhoneNumber());
+            contactEntity2.setContactUserExists(true);
+            contactEntity2.setFavorite(true);
+
+            contactRepository.save(contactEntity2);
+
+            MessageEntity messageEntity = new MessageEntity();
+            messageEntity.setText("Hello there");
+            messageEntity.setSender(userEntity);
+            messageEntity.setReceiver(userEntity2);
+            messageEntity.setReceived(true);
+            messageEntity.setSeen(false);
+            messageEntity.setSenderContactName(contactEntity2.getContactName());
+            messageEntity.setReceiverContactName(contactEntity.getContactName());
+
+            messageRepository.save(messageEntity);
+
+            // Seed users and contacts
             for (int i = 0; i < 70; i++) {
                 String firstName = seedingFirstNames.get(random.nextInt(seedingFirstNames.size()));
                 String lastName = seedingLastNames.get(random.nextInt(seedingLastNames.size()));
@@ -112,14 +150,45 @@ public class UserSeeder implements CommandLineRunner {
 
                 anotherUserEntity = userRepository.save(anotherUserEntity);
 
-                ContactEntity contactEntity = new ContactEntity();
-                contactEntity.setUser(userEntity);
-                contactEntity.setContactUser(anotherUserEntity);
-                contactEntity.setContactName(anotherUserEntity.getFirstName());
-                contactEntity.setContactPhoneNumber(anotherUserEntity.getCountryCode().getDialCode() + anotherUserEntity.getPhoneNumber());
-                contactEntity.setFavorite(i < 5);
+                ContactEntity anotherContactEntity = new ContactEntity();
+                anotherContactEntity.setUser(userEntity);
+                anotherContactEntity.setContactUser(anotherUserEntity);
+                anotherContactEntity.setContactName(anotherUserEntity.getFirstName());
+                anotherContactEntity.setContactPhoneNumber(anotherUserEntity.getCountryCode().getDialCode() + anotherUserEntity.getPhoneNumber());
+                anotherContactEntity.setFavorite(i < 5);
 
-                contactRepository.save(contactEntity);
+                contactRepository.save(anotherContactEntity);
+
+                ContactEntity anotherContactEntity2 = new ContactEntity();
+                anotherContactEntity2.setUser(anotherUserEntity);
+                anotherContactEntity2.setContactUser(userEntity);
+                anotherContactEntity2.setContactName(userEntity.getFirstName());
+                anotherContactEntity2.setContactPhoneNumber(userEntity.getCountryCode().getDialCode() + userEntity.getPhoneNumber());
+                anotherContactEntity2.setFavorite(i < 5);
+
+                contactRepository.save(anotherContactEntity2);
+
+                if (i < 20) {
+                    messageEntity = new MessageEntity();
+                    messageEntity.setText("Hello there" + i);
+                    messageEntity.setReceived(true);
+                    messageEntity.setSeen(false);
+
+
+                    if (i % 2 == 0) {
+                        messageEntity.setSender(userEntity);
+                        messageEntity.setReceiver(anotherUserEntity);
+                        messageEntity.setSenderContactName(anotherContactEntity2.getContactName());
+                        messageEntity.setReceiverContactName(anotherContactEntity.getContactName());
+                    } else {
+                        messageEntity.setSender(anotherUserEntity);
+                        messageEntity.setReceiver(userEntity);
+                        messageEntity.setSenderContactName(anotherContactEntity.getContactName());
+                        messageEntity.setReceiverContactName(anotherContactEntity2.getContactName());
+                    }
+
+                    messageRepository.save(messageEntity);
+                }
             }
 
             log.info("Finished seeding...");
