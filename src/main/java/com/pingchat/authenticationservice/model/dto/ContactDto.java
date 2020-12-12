@@ -1,4 +1,4 @@
-package com.pingchat.authenticationservice.model;
+package com.pingchat.authenticationservice.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

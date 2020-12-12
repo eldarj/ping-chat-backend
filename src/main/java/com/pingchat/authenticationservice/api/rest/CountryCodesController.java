@@ -1,6 +1,6 @@
 package com.pingchat.authenticationservice.api.rest;
 
-import com.pingchat.authenticationservice.model.CountryCodeDto;
+import com.pingchat.authenticationservice.model.dto.CountryCodeDto;
 import com.pingchat.authenticationservice.service.data.CountryCodeDataService;
 import org.springframework.web.bind.annotation.*;
 

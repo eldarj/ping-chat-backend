@@ -13,6 +13,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Random;
 
@@ -127,6 +128,7 @@ public class UserSeeder implements CommandLineRunner {
             messageEntity.setSeen(false);
             messageEntity.setSenderContactName(contactEntity2.getContactName());
             messageEntity.setReceiverContactName(contactEntity.getContactName());
+            messageEntity.setSentTimestamp(Instant.now().plusSeconds(20));
 
             messageRepository.save(messageEntity);
 
@@ -186,6 +188,7 @@ public class UserSeeder implements CommandLineRunner {
                         messageEntity.setSenderContactName(anotherContactEntity.getContactName());
                         messageEntity.setReceiverContactName(anotherContactEntity2.getContactName());
                     }
+                    messageEntity.setSentTimestamp(Instant.now().minusSeconds(i * 100));
 
                     messageRepository.save(messageEntity);
                 }

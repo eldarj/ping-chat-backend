@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pingchat.authenticationservice.data.mysql.entity.CountryCodeEntity;
 import com.pingchat.authenticationservice.data.mysql.repository.CountryCodeRepository;
-import com.pingchat.authenticationservice.model.CountryCodeDto;
+import com.pingchat.authenticationservice.model.dto.CountryCodeDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

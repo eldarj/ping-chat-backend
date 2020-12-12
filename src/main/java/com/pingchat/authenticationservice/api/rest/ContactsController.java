@@ -1,7 +1,7 @@
 package com.pingchat.authenticationservice.api.rest;
 
 import com.pingchat.authenticationservice.auth.util.SecurityContextUserProvider;
-import com.pingchat.authenticationservice.model.ContactDto;
+import com.pingchat.authenticationservice.model.dto.ContactDto;
 import com.pingchat.authenticationservice.service.SmsService;
 import com.pingchat.authenticationservice.service.data.ContactDataService;
 import com.pingchat.authenticationservice.util.pagination.PagedSearchResult;

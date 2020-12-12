@@ -9,7 +9,7 @@ import com.pingchat.authenticationservice.data.mysql.repository.CountryCodeRepos
 import com.pingchat.authenticationservice.data.mysql.repository.TwoWayPinRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.UserRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.UserTokenRepository;
-import com.pingchat.authenticationservice.model.UserDto;
+import com.pingchat.authenticationservice.model.dto.UserDto;
 import com.pingchat.authenticationservice.service.SmsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

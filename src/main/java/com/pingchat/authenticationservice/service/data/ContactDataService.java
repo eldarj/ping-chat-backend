@@ -6,7 +6,7 @@ import com.pingchat.authenticationservice.data.mysql.entity.ContactEntity;
 import com.pingchat.authenticationservice.data.mysql.entity.UserEntity;
 import com.pingchat.authenticationservice.data.mysql.repository.ContactRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.UserRepository;
-import com.pingchat.authenticationservice.model.ContactDto;
+import com.pingchat.authenticationservice.model.dto.ContactDto;
 import com.pingchat.authenticationservice.util.pagination.PagedSearchResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

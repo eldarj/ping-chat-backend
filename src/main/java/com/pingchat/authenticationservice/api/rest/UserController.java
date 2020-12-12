@@ -1,6 +1,6 @@
 package com.pingchat.authenticationservice.api.rest;
 
-import com.pingchat.authenticationservice.model.UserDto;
+import com.pingchat.authenticationservice.model.dto.UserDto;
 import com.pingchat.authenticationservice.service.data.UserDataService;
 import com.pingchat.authenticationservice.service.files.StaticFileStorageService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    private static final String STATIC_FILES_BASE_URL = "http://192.168.1.6:8089/files/";
+    private static final String STATIC_FILES_BASE_URL = "http://192.168.1.4:8089/files/";
 
     private final UserDataService userDataService;
     private final StaticFileStorageService staticFileStorageService;

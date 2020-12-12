@@ -1,13 +1,11 @@
 package com.pingchat.authenticationservice.api.rest;
 
 
-import com.pingchat.authenticationservice.auth.util.SecurityContextUserProvider;
-import com.pingchat.authenticationservice.model.MessageDto;
+import com.pingchat.authenticationservice.model.dto.MessageDto;
 import com.pingchat.authenticationservice.service.data.ContactDataService;
 import com.pingchat.authenticationservice.service.data.MessageDataService;
 import com.pingchat.authenticationservice.util.pagination.PagedSearchResult;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
@@ -29,10 +27,8 @@ public class ChatController {
     public PagedSearchResult<MessageDto> findRecentChats(@PathVariable Long userId,
                                                          @RequestParam Integer pageSize,
                                                          @RequestParam Integer pageNumber) {
-        PagedSearchResult<MessageDto> sentTimestamp = messageDataService.findRecentSentOrReceived(userId,
-                PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "sentTimestamp"))
-        );
-        return sentTimestamp;
+        return messageDataService.findRecentSentOrReceived(userId,
+                PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "sentTimestamp")));
     }
 
 //    @GetMapping("/{receiverPhoneNumber}/{pageNumber}")

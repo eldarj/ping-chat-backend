@@ -1,4 +1,4 @@
-package com.pingchat.authenticationservice.model;
+package com.pingchat.authenticationservice.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,4 +27,12 @@ public class MessageDto implements Serializable {
     private String senderContactName;
 
     private String receiverContactName;
+
+    private boolean senderOnline;
+
+    private boolean receiverOnline;
+
+    private Instant senderLastOnlineTimestamp;
+
+    private Instant receiverLastOnlineTimestamp;
 }
