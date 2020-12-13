@@ -16,7 +16,7 @@ public class PresenceEvent implements Serializable {
 
     private boolean status;
 
-    private Instant eventTimestamp = Instant.now();
+    private Long eventTimestamp = Instant.now().toEpochMilli();
 
     public PresenceEvent(boolean status) {
         this.status = status;

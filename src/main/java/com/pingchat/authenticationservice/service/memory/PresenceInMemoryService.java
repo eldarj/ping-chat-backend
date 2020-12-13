@@ -16,7 +16,7 @@ public class PresenceInMemoryService {
     }
 
     public void setPresence(PresenceEvent presenceEvent) {
-        presenceEvent.setEventTimestamp(Instant.now());
+        presenceEvent.setEventTimestamp(Instant.now().toEpochMilli());
         presences.put(presenceEvent.getUserPhoneNumber(), presenceEvent);
     }
 }

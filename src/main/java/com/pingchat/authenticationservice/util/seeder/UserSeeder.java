@@ -128,7 +128,7 @@ public class UserSeeder implements CommandLineRunner {
             messageEntity.setSeen(true);
             messageEntity.setSenderContactName(contactEntity2.getContactName());
             messageEntity.setReceiverContactName(contactEntity.getContactName());
-            messageEntity.setSentTimestamp(Instant.now().plusSeconds(20));
+            messageEntity.setSentTimestamp(Instant.now().plusSeconds(20).toEpochMilli());
 
             messageRepository.save(messageEntity);
 
@@ -140,7 +140,7 @@ public class UserSeeder implements CommandLineRunner {
             messageEntity2.setSeen(false);
             messageEntity2.setSenderContactName(contactEntity.getContactName());
             messageEntity2.setReceiverContactName(contactEntity2.getContactName());
-            messageEntity2.setSentTimestamp(Instant.now().plusSeconds(50));
+            messageEntity2.setSentTimestamp(Instant.now().plusSeconds(50).toEpochMilli());
 
             messageRepository.save(messageEntity2);
 
@@ -200,7 +200,7 @@ public class UserSeeder implements CommandLineRunner {
                         messageEntity.setSenderContactName(anotherContactEntity.getContactName());
                         messageEntity.setReceiverContactName(anotherContactEntity2.getContactName());
                     }
-                    messageEntity.setSentTimestamp(Instant.now().minusSeconds(i * 100));
+                    messageEntity.setSentTimestamp(Instant.now().minusSeconds(i * 100).toEpochMilli());
 
                     messageRepository.save(messageEntity);
                 }

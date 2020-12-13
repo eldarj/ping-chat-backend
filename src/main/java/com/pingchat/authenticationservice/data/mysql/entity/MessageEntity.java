@@ -34,7 +34,7 @@ public class MessageEntity {
     private boolean seen;
 
     @NotNull
-    private Instant sentTimestamp = Instant.now();
+    private Long sentTimestamp = Instant.now().toEpochMilli();
 
     // denormalized for performance
     private String senderContactName;

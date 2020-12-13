@@ -22,7 +22,7 @@ public class MessageDto implements Serializable {
     private boolean received;
     private boolean seen;
 
-    private Instant sentTimestamp = Instant.now();
+    private Long sentTimestamp = Instant.now().toEpochMilli();
 
     private String senderContactName;
 
@@ -32,7 +32,7 @@ public class MessageDto implements Serializable {
 
     private boolean receiverOnline;
 
-    private Instant senderLastOnlineTimestamp;
+    private Long senderLastOnlineTimestamp;
 
-    private Instant receiverLastOnlineTimestamp;
+    private Long receiverLastOnlineTimestamp;
 }
