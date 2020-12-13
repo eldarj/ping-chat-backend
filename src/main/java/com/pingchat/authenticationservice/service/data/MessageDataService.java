@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -71,6 +72,18 @@ public class MessageDataService {
         List<MessageDto> messageDtos = objectMapper.convertValue(messageEntitiesPage.getContent(), List.class);
 
         return new PagedSearchResult<>(messageDtos, messageEntitiesPage.getTotalElements());
+    }
+
+    public MessageDto save(MessageDto messageDto) {
+        MessageEntity messageEntity = messageRepository.save(objectMapper.convertValue(messageDto,
+                MessageEntity.class));
+
+        return objectMapper.convertValue(messageEntity, MessageDto.class);
+    }
+
+    @Transactional
+    public void updateToSeen(long messageId) {
+        messageRepository.setToSeen(messageId);
     }
 
 //    public Page<MessageDto> findBySenderOrReceiver(String senderPhoneNumber,

@@ -26,4 +26,8 @@ public class UserDto implements Serializable {
     private Long joinedTimestamp = Instant.now().toEpochMilli();
 
     private String profileImagePath;
+
+    public String getFullPhoneNumber() {
+        return this.countryCode.getDialCode() + this.phoneNumber;
+    }
 }

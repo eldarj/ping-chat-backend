@@ -8,6 +8,7 @@ import com.pingchat.authenticationservice.data.mysql.repository.ContactRepositor
 import com.pingchat.authenticationservice.data.mysql.repository.CountryCodeRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.MessageRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.UserRepository;
+import com.pingchat.authenticationservice.util.UniqueUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -99,7 +100,8 @@ public class UserSeeder implements CommandLineRunner {
 
             log.info("Saved user {}", savedUserEntity);
 
-            // Seed messages
+            // Seedcontacts and messages
+            long contactBindingId = UniqueUtil.nextUniqueLong();
             ContactEntity contactEntity = new ContactEntity();
             contactEntity.setUser(userEntity);
             contactEntity.setContactUser(userEntity2);
@@ -107,6 +109,7 @@ public class UserSeeder implements CommandLineRunner {
             contactEntity.setContactPhoneNumber(userEntity2.getCountryCode().getDialCode() + userEntity2.getPhoneNumber());
             contactEntity.setContactUserExists(true);
             contactEntity.setFavorite(true);
+            contactEntity.setContactBindingId(contactBindingId);
 
             contactRepository.save(contactEntity);
 
@@ -117,6 +120,7 @@ public class UserSeeder implements CommandLineRunner {
             contactEntity2.setContactPhoneNumber(userEntity.getCountryCode().getDialCode() + userEntity.getPhoneNumber());
             contactEntity2.setContactUserExists(true);
             contactEntity2.setFavorite(true);
+            contactEntity2.setContactBindingId(contactBindingId);
 
             contactRepository.save(contactEntity2);
 
@@ -124,11 +128,13 @@ public class UserSeeder implements CommandLineRunner {
             messageEntity.setText("Hello there");
             messageEntity.setSender(userEntity);
             messageEntity.setReceiver(userEntity2);
+            messageEntity.setSent(true);
             messageEntity.setReceived(true);
             messageEntity.setSeen(true);
             messageEntity.setSenderContactName(contactEntity2.getContactName());
             messageEntity.setReceiverContactName(contactEntity.getContactName());
             messageEntity.setSentTimestamp(Instant.now().plusSeconds(20).toEpochMilli());
+            messageEntity.setContactBindingId(contactBindingId);
 
             messageRepository.save(messageEntity);
 
@@ -136,11 +142,13 @@ public class UserSeeder implements CommandLineRunner {
             messageEntity2.setText("Hey, whats up");
             messageEntity2.setSender(userEntity2);
             messageEntity2.setReceiver(userEntity);
+            messageEntity.setSent(true);
             messageEntity2.setReceived(true);
             messageEntity2.setSeen(false);
             messageEntity2.setSenderContactName(contactEntity.getContactName());
             messageEntity2.setReceiverContactName(contactEntity2.getContactName());
             messageEntity2.setSentTimestamp(Instant.now().plusSeconds(50).toEpochMilli());
+            messageEntity.setContactBindingId(contactBindingId);
 
             messageRepository.save(messageEntity2);
 
@@ -164,12 +172,14 @@ public class UserSeeder implements CommandLineRunner {
 
                 anotherUserEntity = userRepository.save(anotherUserEntity);
 
+                long anotherContactBindingId = UniqueUtil.nextUniqueLong();
                 ContactEntity anotherContactEntity = new ContactEntity();
                 anotherContactEntity.setUser(userEntity);
                 anotherContactEntity.setContactUser(anotherUserEntity);
                 anotherContactEntity.setContactName(anotherUserEntity.getFirstName());
                 anotherContactEntity.setContactPhoneNumber(anotherUserEntity.getCountryCode().getDialCode() + anotherUserEntity.getPhoneNumber());
                 anotherContactEntity.setFavorite(i < 5);
+                anotherContactEntity.setContactBindingId(anotherContactBindingId);
 
                 contactRepository.save(anotherContactEntity);
 
@@ -179,12 +189,14 @@ public class UserSeeder implements CommandLineRunner {
                 anotherContactEntity2.setContactName(userEntity.getFirstName());
                 anotherContactEntity2.setContactPhoneNumber(userEntity.getCountryCode().getDialCode() + userEntity.getPhoneNumber());
                 anotherContactEntity2.setFavorite(i < 5);
+                anotherContactEntity2.setContactBindingId(anotherContactBindingId);
 
                 contactRepository.save(anotherContactEntity2);
 
                 if (i < 20) {
                     messageEntity = new MessageEntity();
                     messageEntity.setText("Hello there" + i);
+                    messageEntity.setSent(true);
                     messageEntity.setReceived(true);
                     messageEntity.setSeen(false);
 
@@ -200,7 +212,9 @@ public class UserSeeder implements CommandLineRunner {
                         messageEntity.setSenderContactName(anotherContactEntity.getContactName());
                         messageEntity.setReceiverContactName(anotherContactEntity2.getContactName());
                     }
+
                     messageEntity.setSentTimestamp(Instant.now().minusSeconds(i * 100).toEpochMilli());
+                    messageEntity.setContactBindingId(anotherContactBindingId);
 
                     messageRepository.save(messageEntity);
                 }

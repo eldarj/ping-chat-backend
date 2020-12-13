@@ -4,6 +4,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -20,6 +23,9 @@ public class ContactEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+
+    @NotNull
+    private long contactBindingId;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -40,5 +46,5 @@ public class ContactEntity {
     private boolean contactUserExists;
 
     @NotNull
-    private Instant addedTimestamp = Instant.now();
+    private Long addedTimestamp = Instant.now().toEpochMilli();
 }

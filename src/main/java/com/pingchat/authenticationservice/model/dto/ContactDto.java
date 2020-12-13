@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.Instant;
 
@@ -15,6 +16,9 @@ public class ContactDto implements Serializable {
 
     private long id;
 
+    @NotNull
+    private long contactBindingId;
+
     private UserDto contactUser;
     private String contactName;
     private String contactPhoneNumber;
@@ -22,5 +26,5 @@ public class ContactDto implements Serializable {
 
     private boolean contactUserExists;
 
-    private Instant addedTimestamp = Instant.now();
+    private Long addedTimestamp = Instant.now().toEpochMilli();
 }

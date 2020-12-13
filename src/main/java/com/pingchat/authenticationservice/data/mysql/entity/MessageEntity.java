@@ -30,6 +30,10 @@ public class MessageEntity {
     @JoinColumn(name = "receiver_user_id")
     private UserEntity receiver;
 
+    @NotNull
+    private long contactBindingId;
+
+    private boolean sent;
     private boolean received;
     private boolean seen;
 

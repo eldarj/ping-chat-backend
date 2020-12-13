@@ -2,12 +2,10 @@ package com.pingchat.authenticationservice.data.mysql.repository;
 
 import com.pingchat.authenticationservice.data.mysql.entity.MessageEntity;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-
-import java.util.Collection;
 
 public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     @Query("SELECT m FROM MessageEntity m WHERE m.receiver.id = :userId OR m.sender.id = :userId")
@@ -18,6 +16,10 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             "(m.receiver.id = :userId AND m.sender.id = :anotherUserId) OR " +
             "(m.receiver.id = :anotherUserId AND m.sender.id = :userId)")
     Page<MessageEntity> findByUsers(Long userId, Long anotherUserId, Pageable pageable);
+
+    @Modifying
+    @Query("UPDATE MessageEntity m SET m.seen = true WHERE m.id = :messageId")
+    void setToSeen(long messageId);
 
 //    Page<MessageEntity> findAllBySenderIdAndReceiverId(long senderId, long receiverId, Pageable pageable);
 //
