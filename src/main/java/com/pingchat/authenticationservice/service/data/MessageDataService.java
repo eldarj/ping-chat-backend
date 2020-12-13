@@ -65,6 +65,14 @@ public class MessageDataService {
         return new PagedSearchResult<>(messageDtos, messageEntitiesPage.getTotalElements());
     }
 
+    public PagedSearchResult<MessageDto> findMessagesByUsers(Long userId, Long anotherUserId, PageRequest pageRequest) {
+        Page<MessageEntity> messageEntitiesPage = messageRepository.findByUsers(userId, anotherUserId, pageRequest);
+
+        List<MessageDto> messageDtos = objectMapper.convertValue(messageEntitiesPage.getContent(), List.class);
+
+        return new PagedSearchResult<>(messageDtos, messageEntitiesPage.getTotalElements());
+    }
+
 //    public Page<MessageDto> findBySenderOrReceiver(String senderPhoneNumber,
 //                                                   String receiverPhoneNumber,
 //                                                   PageRequest pageRequest) {

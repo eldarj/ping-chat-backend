@@ -125,12 +125,24 @@ public class UserSeeder implements CommandLineRunner {
             messageEntity.setSender(userEntity);
             messageEntity.setReceiver(userEntity2);
             messageEntity.setReceived(true);
-            messageEntity.setSeen(false);
+            messageEntity.setSeen(true);
             messageEntity.setSenderContactName(contactEntity2.getContactName());
             messageEntity.setReceiverContactName(contactEntity.getContactName());
             messageEntity.setSentTimestamp(Instant.now().plusSeconds(20));
 
             messageRepository.save(messageEntity);
+
+            MessageEntity messageEntity2 = new MessageEntity();
+            messageEntity2.setText("Hey, whats up");
+            messageEntity2.setSender(userEntity2);
+            messageEntity2.setReceiver(userEntity);
+            messageEntity2.setReceived(true);
+            messageEntity2.setSeen(false);
+            messageEntity2.setSenderContactName(contactEntity.getContactName());
+            messageEntity2.setReceiverContactName(contactEntity2.getContactName());
+            messageEntity2.setSentTimestamp(Instant.now().plusSeconds(50));
+
+            messageRepository.save(messageEntity2);
 
             // Seed users and contacts
             for (int i = 0; i < 70; i++) {
