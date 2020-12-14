@@ -13,7 +13,9 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     @Query(value = "SELECT m.* FROM (" +
             "SELECT max(sent_timestamp) AS sent_timestamp FROM messages " +
             "WHERE receiver_user_id = ?1 OR sender_user_id = ?1 GROUP BY contact_binding_id" +
-            ") t INNER JOIN messages m ON m.sent_timestamp = t.sent_timestamp LIMIT ?2 OFFSET ?3",
+            ") t INNER JOIN messages m ON m.sent_timestamp = t.sent_timestamp " +
+            "ORDER BY m.sent_timestamp DESC " +
+            "LIMIT ?2 OFFSET ?3",
             nativeQuery = true)
     List<MessageEntity> findDistinctByUser(Long userId, int pageSize, int pageNumber);
 
