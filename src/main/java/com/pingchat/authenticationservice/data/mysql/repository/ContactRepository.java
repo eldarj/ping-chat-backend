@@ -24,5 +24,4 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
     @Modifying
     @Query("UPDATE ContactEntity c set c.isFavorite = :isFavourite where c.id = :contactId")
     void updateFavouriteStatus(Long contactId, Boolean isFavourite);
-
 }

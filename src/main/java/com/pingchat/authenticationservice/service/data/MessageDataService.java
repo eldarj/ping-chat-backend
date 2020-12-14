@@ -37,11 +37,11 @@ public class MessageDataService {
         this.presenceInMemoryService = presenceInMemoryService;
     }
 
-    public PagedSearchResult<MessageDto> findRecentSentOrReceived(Long userId, PageRequest pageRequest) {
-        Page<MessageEntity> messageEntitiesPage = messageRepository.findAllBySenderOrReceiver(
-                userId, pageRequest);
+    public PagedSearchResult<MessageDto> findRecentSentOrReceived(Long userId, int pageSize, int pageNumber) {
+        List<MessageEntity> messageEntitiesPage = messageRepository.findDistinctByUser(userId,
+                pageSize, pageNumber * pageSize);
 
-        List<MessageDto> messageDtos = messageEntitiesPage.getContent().stream().map(messageEntity -> {
+        List<MessageDto> messageDtos = messageEntitiesPage.stream().map(messageEntity -> {
             MessageDto messageDto = objectMapper.convertValue(messageEntity, MessageDto.class);
 
             PresenceEvent receiverPresence = presenceInMemoryService.getPresence(
@@ -63,7 +63,7 @@ public class MessageDataService {
             return messageDto;
         }).collect(toList());
 
-        return new PagedSearchResult<>(messageDtos, messageEntitiesPage.getTotalElements());
+        return new PagedSearchResult<>(messageDtos, Integer.toUnsignedLong(messageDtos.size()));
     }
 
     public PagedSearchResult<MessageDto> findMessagesByUsers(Long userId, Long anotherUserId, PageRequest pageRequest) {
@@ -84,6 +84,12 @@ public class MessageDataService {
     @Transactional
     public void updateToSeen(long messageId) {
         messageRepository.setToSeen(messageId);
+    }
+
+
+    @Transactional
+    public void updateToReceived(long messageId) {
+        messageRepository.setToReceived(messageId);
     }
 
 //    public Page<MessageDto> findBySenderOrReceiver(String senderPhoneNumber,

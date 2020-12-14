@@ -7,9 +7,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+
 public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
-    @Query("SELECT m FROM MessageEntity m WHERE m.receiver.id = :userId OR m.sender.id = :userId")
-    Page<MessageEntity> findAllBySenderOrReceiver(Long userId, Pageable pageable);
+    @Query(value = "SELECT m.* FROM (" +
+            "SELECT max(sent_timestamp) AS sent_timestamp FROM messages " +
+            "WHERE receiver_user_id = ?1 OR sender_user_id = ?1 GROUP BY contact_binding_id" +
+            ") t INNER JOIN messages m ON m.sent_timestamp = t.sent_timestamp LIMIT ?2 OFFSET ?3",
+            nativeQuery = true)
+    List<MessageEntity> findDistinctByUser(Long userId, int pageSize, int pageNumber);
+
+//    @Query("SELECT m FROM MessageEntity m WHERE m.receiver.id = :userId OR m.sender.id = :userId")
+//    Page<MessageEntity> findDistinctByUser(Long userId, Pageable pageable);
 
     // TODO change this to a single hash value, equal across both contact entities
     @Query("SELECT m FROM MessageEntity  m WHERE " +
@@ -20,6 +29,11 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     @Modifying
     @Query("UPDATE MessageEntity m SET m.seen = true WHERE m.id = :messageId")
     void setToSeen(long messageId);
+
+
+    @Modifying
+    @Query("UPDATE MessageEntity m SET m.received = true WHERE m.id = :messageId")
+    void setToReceived(long messageId);
 
 //    Page<MessageEntity> findAllBySenderIdAndReceiverId(long senderId, long receiverId, Pageable pageable);
 //

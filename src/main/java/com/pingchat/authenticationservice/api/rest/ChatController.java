@@ -27,8 +27,11 @@ public class ChatController {
     public PagedSearchResult<MessageDto> findRecentChats(@PathVariable Long userId,
                                                          @RequestParam Integer pageSize,
                                                          @RequestParam Integer pageNumber) {
-        return messageDataService.findRecentSentOrReceived(userId,
-                PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "sentTimestamp")));
+//        return messageDataService.findRecentSentOrReceived(userId,
+//                PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "sentTimestamp")));
+
+
+        return messageDataService.findRecentSentOrReceived(userId, pageSize, pageNumber);
     }
 
 //    @GetMapping("/{receiverPhoneNumber}/{pageNumber}")

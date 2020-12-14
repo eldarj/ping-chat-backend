@@ -7,6 +7,7 @@ import com.pingchat.authenticationservice.data.mysql.entity.UserEntity;
 import com.pingchat.authenticationservice.data.mysql.repository.ContactRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.UserRepository;
 import com.pingchat.authenticationservice.model.dto.ContactDto;
+import com.pingchat.authenticationservice.util.UniqueUtil;
 import com.pingchat.authenticationservice.util.pagination.PagedSearchResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -58,6 +59,9 @@ public class ContactDataService {
         UserEntity contactUser = userRepository.findByDialCodeAndPhoneNumber(contactDto.getContactPhoneNumber());
         contactEntity.setContactUser(contactUser);
         contactEntity.setContactUserExists(contactUser != null);
+
+        // TODO: Fix vice versa adding contacts
+        contactEntity.setContactBindingId(UniqueUtil.nextUniqueLong());
 
         contactEntity = contactRepository.save(contactEntity);
 

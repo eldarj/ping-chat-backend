@@ -148,7 +148,7 @@ public class UserSeeder implements CommandLineRunner {
             messageEntity2.setSenderContactName(contactEntity.getContactName());
             messageEntity2.setReceiverContactName(contactEntity2.getContactName());
             messageEntity2.setSentTimestamp(Instant.now().plusSeconds(50).toEpochMilli());
-            messageEntity.setContactBindingId(contactBindingId);
+            messageEntity2.setContactBindingId(contactBindingId);
 
             messageRepository.save(messageEntity2);
 
