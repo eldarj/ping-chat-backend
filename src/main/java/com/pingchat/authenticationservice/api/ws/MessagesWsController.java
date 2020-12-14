@@ -12,6 +12,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -60,15 +62,21 @@ public class MessagesWsController {
     }
 
     @MessageMapping("/messages/seen")
-    public void messageSeen(@Payload MessageStatusChangeDto messageStatusChangeDto, Principal receiverPrincipal) {
-        long messageId = messageStatusChangeDto.getId();
-        String senderPhoneNumber = messageStatusChangeDto.getSenderPhoneNumber();
+    public void messageSeen(@Payload List<MessageStatusChangeDto> messageStatusChangeDto, Principal receiverPrincipal) {
+        String senderPhoneNumber = messageStatusChangeDto.get(0).getSenderPhoneNumber();
+        List<Long> messageIds = new ArrayList<>();
 
-        messageDataService.updateToSeen(messageId);
+        messageStatusChangeDto.forEach(messageStatusChangeDto1 -> {
+            long messageId = messageStatusChangeDto1.getId();
 
-        unreadMessagesInMemoryService.remove(messageId, senderPhoneNumber, receiverPrincipal.getName());
+            messageDataService.updateToSeen(messageId);
+
+            unreadMessagesInMemoryService.remove(messageId, senderPhoneNumber, receiverPrincipal.getName());
+
+            messageIds.add(messageId);
+        });
 
         simpMessagingTemplate.convertAndSendToUser(senderPhoneNumber, "/messages/seen",
-                messageId);
+                messageIds);
     }
 }

@@ -125,7 +125,7 @@ public class UserSeeder implements CommandLineRunner {
             contactRepository.save(contactEntity2);
 
             MessageEntity messageEntity = new MessageEntity();
-            messageEntity.setText("Hello there");
+            messageEntity.setText("Hey, what's up?");
             messageEntity.setSender(userEntity);
             messageEntity.setReceiver(userEntity2);
             messageEntity.setSent(true);
@@ -139,7 +139,9 @@ public class UserSeeder implements CommandLineRunner {
             messageRepository.save(messageEntity);
 
             MessageEntity messageEntity2 = new MessageEntity();
-            messageEntity2.setText("Hey, whats up");
+            messageEntity2.setText("Hey, whats up, how are you doing? Are you free for a call, perhaps today " +
+                    "or tomorrow " +
+                    "around 18.00?");
             messageEntity2.setSender(userEntity2);
             messageEntity2.setReceiver(userEntity);
             messageEntity.setSent(true);

@@ -20,10 +20,10 @@ public class MessagesController {
     }
 
     @GetMapping
-    public PagedSearchResult<MessageDto> findRecentChats(@RequestParam Long userId,
-                                                         @RequestParam Long anotherUserId,
-                                                         @RequestParam Integer pageSize,
-                                                         @RequestParam Integer pageNumber) {
+    public PagedSearchResult<MessageDto> findMessagesByUsers(@RequestParam Long userId,
+                                                             @RequestParam Long anotherUserId,
+                                                             @RequestParam Integer pageSize,
+                                                             @RequestParam Integer pageNumber) {
         return messageDataService.findMessagesByUsers(userId, anotherUserId,
                 PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "sentTimestamp")));
     }
