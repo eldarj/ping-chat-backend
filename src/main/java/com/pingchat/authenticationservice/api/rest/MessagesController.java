@@ -24,8 +24,17 @@ public class MessagesController {
                                                              @RequestParam Long anotherUserId,
                                                              @RequestParam Integer pageSize,
                                                              @RequestParam Integer pageNumber) {
-        return messageDataService.findMessagesByUsers(userId, anotherUserId,
+        long startTime = System.nanoTime();
+
+        PagedSearchResult<MessageDto> userMessagesPage = messageDataService.findMessagesByUsers(userId, anotherUserId,
                 PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "sentTimestamp")));
+
+        long endTime = System.nanoTime();
+        long ms = (endTime - startTime) / 1_000_000;
+
+        log.info("Fetched user messages in s={} (ms={})", ms / 1000, ms);
+
+        return userMessagesPage;
     }
 
 //    @GetMapping("/{receiverPhoneNumber}/{pageNumber}")

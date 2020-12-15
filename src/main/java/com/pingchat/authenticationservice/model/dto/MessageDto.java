@@ -1,5 +1,6 @@
 package com.pingchat.authenticationservice.model.dto;
 
+import com.pingchat.authenticationservice.enums.MessageType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,4 +40,8 @@ public class MessageDto implements Serializable {
     private Long senderLastOnlineTimestamp;
 
     private Long receiverLastOnlineTimestamp;
+
+    private boolean isChained;
+
+    private MessageType messageType = MessageType.TEXT_MESSAGE;
 }

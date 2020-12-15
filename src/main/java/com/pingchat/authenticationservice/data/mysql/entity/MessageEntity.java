@@ -1,5 +1,6 @@
 package com.pingchat.authenticationservice.data.mysql.entity;
 
+import com.pingchat.authenticationservice.enums.MessageType;
 import lombok.*;
 
 import javax.persistence.*;
@@ -44,4 +45,6 @@ public class MessageEntity {
     private String senderContactName;
 
     private String receiverContactName;
+
+    private MessageType messageType = MessageType.TEXT_MESSAGE;
 }

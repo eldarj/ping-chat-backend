@@ -32,11 +32,13 @@ public class UserSeeder implements CommandLineRunner {
             "Indira", "Edvina", "Mirka", "Admira", "Selmana", "Samira", "Elizabeta",
             "Jasmina", "Arnela", "Ajla", "Amila", "Edina", "Ivana", "Milica", "Senada", "Senida",
             "Almasa","Armin","Jelena","Igor","Mario","Ivica","Samir","Semir", "Ivana");
+
     private final List<String> seedingLastNames = List.of(
             "Jenciragic", "Hadzijalagic", "Kot", "Belkisa", "Radic", "Ivanovic",
             "Kuslut", "Kusetovic", "Balaban", "Avdic", "Popara", "Zagrljaca", "Span",
             "Pozdarlic", "Muk", "Potok", "Blitvic", "Jahijagic", "Halilovic", "Hamidovic",
             "Josipovic", "Osim", "Maric", "Lukic", "Borovic", "Mehmedovic", "Spago");
+
     private final List<String> seedingAvatars = List.of(
             "https://images.pexels.com/users/avatars/2272619/rachel-claire-647.jpeg?auto=compress&fit=crop&h=256&w=256",
             "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMnQXZsq16O6PnxLOZC40Ry_HgVoI-FjfwBg&usqp=CAU",
@@ -51,6 +53,27 @@ public class UserSeeder implements CommandLineRunner {
             "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgHclVKvHedn6Ajd9Zy8MD3VQam9YwVe5Vmg&usqp=CAU",
             "https://a.thumbs.redditmedia.com/DIgiF5PWb2_NQRUhgowmca2zuuJDXHG54NXiNysMmE8.png",
             "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQF_w6FQwmxVqCg8M2SfFzQbxnKhZBc2E_Gw&usqp=CAU"
+    );
+
+    private final List<String> seedingMessages = List.of(
+            "How are you?",
+            "What's up?",
+            "What you up to, wanna hangout?",
+            "Are you free for a call?",
+            "Is this working?",
+            "Thank you.",
+            "Anyways, what's your Linkedin url?",
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            "Animum autem reliquis rebus ita perfecit, ut corpus.",
+            "Sed fac ista esse non inportuna",
+            "Quo tandem modo?",
+            "Duo Reges: constructio interrete.",
+            "Memini vero, inquam.",
+            "Haec dicuntur inconstantissime.",
+            "Haha",
+            "An eiusdem modi?",
+            "Itaque hic ipse iam pridem est reiectus; Nobis aliter videtur, recte secusne, postea.",
+            "Duo Reges: constructio interrete."
     );
 
     private final Random random = new Random();
@@ -133,7 +156,7 @@ public class UserSeeder implements CommandLineRunner {
             messageEntity.setSeen(true);
             messageEntity.setSenderContactName(contactEntity2.getContactName());
             messageEntity.setReceiverContactName(contactEntity.getContactName());
-            messageEntity.setSentTimestamp(Instant.now().plusSeconds(20).toEpochMilli());
+            messageEntity.setSentTimestamp(Instant.now().minusSeconds(120).toEpochMilli());
             messageEntity.setContactBindingId(contactBindingId);
 
             messageRepository.save(messageEntity);
@@ -149,10 +172,32 @@ public class UserSeeder implements CommandLineRunner {
             messageEntity2.setSeen(false);
             messageEntity2.setSenderContactName(contactEntity.getContactName());
             messageEntity2.setReceiverContactName(contactEntity2.getContactName());
-            messageEntity2.setSentTimestamp(Instant.now().plusSeconds(50).toEpochMilli());
+            messageEntity2.setSentTimestamp(Instant.now().toEpochMilli());
             messageEntity2.setContactBindingId(contactBindingId);
 
             messageRepository.save(messageEntity2);
+
+            for (int i = 0; i < 20; i++) {
+                int messagesSize = seedingMessages.size();
+                messageEntity2.setText(
+                        seedingMessages.get(random.nextInt(messagesSize)) + " " +
+                                seedingMessages.get(random.nextInt(messagesSize)) + " " +
+                                seedingMessages.get(random.nextInt(messagesSize))
+                );
+                messageEntity2.setSentTimestamp(Instant.now().toEpochMilli());
+                messageEntity2.setId(0);
+                messageRepository.save(messageEntity2);
+
+                messageEntity.setId(0);
+                messageEntity.setText(
+                        seedingMessages.get(random.nextInt(messagesSize)) + " " +
+                                seedingMessages.get(random.nextInt(messagesSize)) + " " +
+                                seedingMessages.get(random.nextInt(messagesSize))
+                );
+                messageEntity.setSentTimestamp(Instant.now().toEpochMilli());
+                messageRepository.save(messageEntity);
+            }
+
 
             // Seed users and contacts
             for (int i = 0; i < 70; i++) {
