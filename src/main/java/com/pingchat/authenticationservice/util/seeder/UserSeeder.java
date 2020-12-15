@@ -8,6 +8,7 @@ import com.pingchat.authenticationservice.data.mysql.repository.ContactRepositor
 import com.pingchat.authenticationservice.data.mysql.repository.CountryCodeRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.MessageRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.UserRepository;
+import com.pingchat.authenticationservice.enums.MessageType;
 import com.pingchat.authenticationservice.util.UniqueUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -167,9 +168,9 @@ public class UserSeeder implements CommandLineRunner {
                     "around 18.00?");
             messageEntity2.setSender(userEntity2);
             messageEntity2.setReceiver(userEntity);
-            messageEntity.setSent(true);
+            messageEntity2.setSent(true);
             messageEntity2.setReceived(true);
-            messageEntity2.setSeen(false);
+            messageEntity2.setSeen(true);
             messageEntity2.setSenderContactName(contactEntity.getContactName());
             messageEntity2.setReceiverContactName(contactEntity2.getContactName());
             messageEntity2.setSentTimestamp(Instant.now().toEpochMilli());
@@ -179,24 +180,37 @@ public class UserSeeder implements CommandLineRunner {
 
             for (int i = 0; i < 20; i++) {
                 int messagesSize = seedingMessages.size();
+                messageEntity2.setId(0);
                 messageEntity2.setText(
                         seedingMessages.get(random.nextInt(messagesSize)) + " " +
                                 seedingMessages.get(random.nextInt(messagesSize)) + " " +
-                                seedingMessages.get(random.nextInt(messagesSize))
-                );
+                                seedingMessages.get(random.nextInt(messagesSize)));
                 messageEntity2.setSentTimestamp(Instant.now().toEpochMilli());
-                messageEntity2.setId(0);
                 messageRepository.save(messageEntity2);
 
                 messageEntity.setId(0);
                 messageEntity.setText(
                         seedingMessages.get(random.nextInt(messagesSize)) + " " +
                                 seedingMessages.get(random.nextInt(messagesSize)) + " " +
-                                seedingMessages.get(random.nextInt(messagesSize))
-                );
+                                seedingMessages.get(random.nextInt(messagesSize)));
                 messageEntity.setSentTimestamp(Instant.now().toEpochMilli());
                 messageRepository.save(messageEntity);
             }
+
+            // Seed unicode
+            messageEntity2.setId(0);
+            messageEntity2.setText("Ok \uD83D\uDE04\uD83D\uDE04");
+            messageEntity2.setSentTimestamp(Instant.now().toEpochMilli());
+            messageRepository.save(messageEntity2);
+
+
+            // Seed sticker
+            messageEntity.setId(0);
+            messageEntity.setText("panda3.png");
+            messageEntity.setSentTimestamp(Instant.now().toEpochMilli());
+            messageEntity.setMessageType(MessageType.STICKER);
+            messageEntity.setSeen(false);
+            messageRepository.save(messageEntity);
 
 
             // Seed users and contacts
