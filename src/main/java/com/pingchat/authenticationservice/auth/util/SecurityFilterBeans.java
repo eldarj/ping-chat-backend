@@ -15,11 +15,14 @@ import java.util.Set;
 public class SecurityFilterBeans {
     public static final String AUTHENTICATION_ENDPOINT = "/api/authenticate";
     public static final String COUNTRY_CODES_ENDPOINT = "/api/country-codes";
+    public static final String DATA_SPACE_ENDPOINT = "/api/data-space/upload";
     public static final String STATIC_FILES_ENDPOINT = "/files";
 
     public static final Set<String> PUBLIC_ENDPOINTS = Set.of(
             AUTHENTICATION_ENDPOINT,
-            COUNTRY_CODES_ENDPOINT
+            COUNTRY_CODES_ENDPOINT,
+            DATA_SPACE_ENDPOINT,
+            STATIC_FILES_ENDPOINT
     );
 
     private final ObjectMapper objectMapper;
@@ -46,6 +49,6 @@ public class SecurityFilterBeans {
 
     @Bean
     public JwtAuthorizationFilter authorizationFilter() {
-        return new JwtAuthorizationFilter(objectMapper, authorizationManager, PUBLIC_ENDPOINTS, STATIC_FILES_ENDPOINT);
+        return new JwtAuthorizationFilter(objectMapper, authorizationManager, PUBLIC_ENDPOINTS);
     }
 }

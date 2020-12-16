@@ -1,7 +1,8 @@
 package com.pingchat.authenticationservice.config;
 
-import com.pingchat.authenticationservice.service.files.StaticFileStorageService;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -15,15 +16,14 @@ import java.nio.file.Paths;
 @EnableWebMvc
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {
-    private final StaticFileStorageService staticFileStorageService;
-
-    public MvcConfig(StaticFileStorageService staticFileStorageService) {
-        this.staticFileStorageService = staticFileStorageService;
-    }
+    // TODO: Move this to a configuration bean
+    @Setter
+    @Value("${service.static-base-path}")
+    private String staticBasePath;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String staticDirectoryPath = staticFileStorageService.getStaticDirectoryPath();
+        String staticDirectoryPath = staticBasePath;
 
         try {
             initializeStaticDirectory(staticDirectoryPath);
