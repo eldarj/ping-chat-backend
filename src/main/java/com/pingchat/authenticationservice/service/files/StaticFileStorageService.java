@@ -16,22 +16,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+// TODO: Remove and use TusService for any uploads
 @Service
 public class StaticFileStorageService {
     @Getter
     @Setter
-    @Value("${service.static-directory-path}")
-    private String staticDirectoryPath;
+    @Value("${service.profile-images-path}")
+    private String profileImagesPath;
 
     private static final int SCALE_IMAGE_TO_SIZE = 150;
 
-
-    public String save(MultipartFile file) throws IOException {
+    public String saveProfileImage(MultipartFile file) throws IOException {
         // Create file by path
         String[] split = file.getOriginalFilename().split("/");
         String fileName = split[split.length - 1];
 
-        Path newFilePath = Paths.get(staticDirectoryPath + "/" + fileName);
+        Path newFilePath = Paths.get(profileImagesPath + "/" + fileName);
 
         try {
             Files.createFile(newFilePath);

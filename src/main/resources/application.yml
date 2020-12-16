@@ -3,7 +3,8 @@ server:
 
 service:
   name: ping-authentication-service
-  static-directory-path: /home/${user.name}/application/${service.name}/static
+  static-base-path: /home/${user.name}/application/${service.name}/files
+  profile-images-path: ${service.static-base-path}/profiles
 
 spring:
   servlet:

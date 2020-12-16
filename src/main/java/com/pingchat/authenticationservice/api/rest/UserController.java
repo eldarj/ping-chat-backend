@@ -59,7 +59,7 @@ public class UserController {
 
     @PostMapping("/{userId}/profile-image")
     public String handleFileUpload(@PathVariable long userId, @RequestParam("file") MultipartFile file) throws IOException {
-        String newFileName = staticFileStorageService.save(file);
+        String newFileName = staticFileStorageService.saveProfileImage(file);
 
         String newProfileImagePath = STATIC_FILES_BASE_URL + newFileName;
 

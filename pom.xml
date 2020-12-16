@@ -79,6 +79,12 @@
 
         <!-- Other -->
         <dependency>
+            <groupId>me.desair.tus</groupId>
+            <artifactId>tus-java-server</artifactId>
+            <version>1.0.0-2.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.codehaus.janino</groupId>
             <artifactId>janino</artifactId>
         </dependency>
