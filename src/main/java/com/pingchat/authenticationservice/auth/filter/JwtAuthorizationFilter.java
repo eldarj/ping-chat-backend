@@ -3,7 +3,6 @@ package com.pingchat.authenticationservice.auth.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pingchat.authenticationservice.auth.manager.AuthorizationManager;
 import com.pingchat.authenticationservice.auth.util.AuthenticationHolder;
-import com.pingchat.authenticationservice.data.mysql.entity.UserEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,22 +22,19 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private final ObjectMapper objectMapper;
 
     private final Set<String> publicEndpoints;
-    private final String staticFilesEndpoint;
 
     public JwtAuthorizationFilter(ObjectMapper objectMapper,
                                   AuthorizationManager authorizationManager,
-                                  Set<String> publicEndpoints,
-                                  String staticFilesEndpoint) {
+                                  Set<String> publicEndpoints) {
         this.objectMapper = objectMapper;
         this.authorizationManager = authorizationManager;
         this.publicEndpoints = publicEndpoints;
-        this.staticFilesEndpoint = staticFilesEndpoint;
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String servletPath = request.getServletPath();
-        return publicEndpoints.contains(servletPath) || servletPath.startsWith(staticFilesEndpoint);
+        return publicEndpoints.stream().anyMatch(servletPath::startsWith);
     }
 
     @Override
