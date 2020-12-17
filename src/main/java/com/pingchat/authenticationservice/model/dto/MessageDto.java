@@ -49,5 +49,7 @@ public class MessageDto implements Serializable {
 
     private String fileUrl;
 
+    private boolean isDeleted;
+
     private MessageType messageType = MessageType.TEXT_MESSAGE;
 }
