@@ -19,7 +19,6 @@ public class MessageEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @NotBlank
     @Column(columnDefinition = "text")
     private String text;
 
@@ -45,6 +44,12 @@ public class MessageEntity {
     private String senderContactName;
 
     private String receiverContactName;
+
+    private String fileName;
+
+    private String filePath;
+
+    private String fileUrl;
 
     private MessageType messageType = MessageType.TEXT_MESSAGE;
 }

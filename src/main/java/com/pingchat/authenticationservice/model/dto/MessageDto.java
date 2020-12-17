@@ -43,5 +43,11 @@ public class MessageDto implements Serializable {
 
     private boolean isChained;
 
+    private String fileName;
+
+    private String filePath;
+
+    private String fileUrl;
+
     private MessageType messageType = MessageType.TEXT_MESSAGE;
 }
