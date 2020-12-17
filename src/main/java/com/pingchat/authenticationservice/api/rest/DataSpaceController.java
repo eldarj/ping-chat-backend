@@ -3,11 +3,14 @@ package com.pingchat.authenticationservice.api.rest;
 import lombok.extern.slf4j.Slf4j;
 import me.desair.tus.server.TusFileUploadService;
 import me.desair.tus.server.exception.TusException;
+import me.desair.tus.server.exception.UploadAlreadyLockedException;
 import me.desair.tus.server.upload.UploadInfo;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -33,9 +37,10 @@ public class DataSpaceController {
         this.tusFileUploadService = tusFileUploadService;
     }
 
+    // Hook into db
     @RequestMapping(value = {"/upload", "/upload/**"},
             method = {RequestMethod.POST, RequestMethod.PATCH, RequestMethod.HEAD})
-    public void processUpload(final HttpServletRequest servletRequest, final HttpServletResponse servletResponse)
+    public void upload(final HttpServletRequest servletRequest, final HttpServletResponse servletResponse)
             throws IOException, TusException {
         tusFileUploadService.process(servletRequest, servletResponse);
 
@@ -56,5 +61,27 @@ public class DataSpaceController {
 
             this.tusFileUploadService.deleteUpload(uploadUrl);
         }
+    }
+
+    // TODO: Hook into db
+    @Retryable(value = UploadAlreadyLockedException.class, backoff = @Backoff(delay = 10_000L))
+    @DeleteMapping("/upload/{uploadUrl}")
+    public ResponseEntity<Object> delete(@PathVariable String uploadUrl, @RequestParam String fileName) throws IOException,
+            TusException {
+        UploadInfo uploadInfo = this.tusFileUploadService.getUploadInfo(uploadUrl);
+
+        if (uploadInfo == null && !StringUtils.hasLength(fileName)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (uploadInfo != null) {
+            Files.deleteIfExists(Paths.get(staticBasePath + "/uploads").resolve(uploadInfo.getFileName()));
+            this.tusFileUploadService.deleteUpload(uploadUrl);
+
+        } else if (StringUtils.hasLength(fileName)) {
+            Files.deleteIfExists(Paths.get(staticBasePath + "/uploads").resolve(fileName));
+        }
+
+        return ResponseEntity.noContent().build();
     }
 }
