@@ -79,4 +79,13 @@ public class MessagesWsController {
         simpMessagingTemplate.convertAndSendToUser(senderPhoneNumber, "/messages/seen",
                 messageIds);
     }
+
+    @MessageMapping("/messages/deleted")
+    public void messageDeleted(@Payload MessageDto messageDto) {
+        messageDto.setDeleted(true);
+        messageDataService.deleteById(messageDto.getId());
+
+        simpMessagingTemplate.convertAndSendToUser(messageDto.getReceiver().getFullPhoneNumber(), "/messages/deleted",
+                messageDto);
+    }
 }

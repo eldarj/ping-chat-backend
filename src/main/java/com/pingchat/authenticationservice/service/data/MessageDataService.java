@@ -93,6 +93,11 @@ public class MessageDataService {
         messageRepository.setToReceived(messageId);
     }
 
+    @Transactional
+    public void deleteById(Long messageId) {
+        messageRepository.deleteMessage(messageId);
+    }
+
 //    public Page<MessageDto> findBySenderOrReceiver(String senderPhoneNumber,
 //                                                   String receiverPhoneNumber,
 //                                                   PageRequest pageRequest) {

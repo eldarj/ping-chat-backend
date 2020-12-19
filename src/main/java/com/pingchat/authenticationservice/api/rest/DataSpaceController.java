@@ -20,7 +20,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -37,7 +36,6 @@ public class DataSpaceController {
         this.tusFileUploadService = tusFileUploadService;
     }
 
-    // Hook into db
     @RequestMapping(value = {"/upload", "/upload/**"},
             method = {RequestMethod.POST, RequestMethod.PATCH, RequestMethod.HEAD})
     public void upload(final HttpServletRequest servletRequest, final HttpServletResponse servletResponse)
@@ -63,11 +61,10 @@ public class DataSpaceController {
         }
     }
 
-    // TODO: Hook into db
     @Retryable(value = UploadAlreadyLockedException.class, backoff = @Backoff(delay = 10_000L))
     @DeleteMapping("/upload/{uploadUrl}")
-    public ResponseEntity<Object> delete(@PathVariable String uploadUrl, @RequestParam String fileName) throws IOException,
-            TusException {
+    public ResponseEntity<Object> delete(@PathVariable String uploadUrl, @RequestParam String fileName)
+            throws IOException, TusException {
         UploadInfo uploadInfo = this.tusFileUploadService.getUploadInfo(uploadUrl);
 
         if (uploadInfo == null && !StringUtils.hasLength(fileName)) {

@@ -37,6 +37,10 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     @Query("UPDATE MessageEntity m SET m.received = true WHERE m.id = :messageId")
     void setToReceived(long messageId);
 
+    @Modifying
+    @Query("UPDATE MessageEntity m SET m.isDeleted = true WHERE m.id = :messageId")
+    void deleteMessage(Long messageId);
+
 //    Page<MessageEntity> findAllBySenderIdAndReceiverId(long senderId, long receiverId, Pageable pageable);
 //
 //    Page<MessageEntity> findAllBySenderIdInAndReceiverIdIn(Collection<Long> senderReceiver,

@@ -37,6 +37,11 @@ public class MessagesController {
         return userMessagesPage;
     }
 
+    @DeleteMapping("{messageId}")
+    public void deleteById(@PathVariable Long messageId) {
+        messageDataService.deleteById(messageId);
+    }
+
 //    @GetMapping("/{receiverPhoneNumber}/{pageNumber}")
 //    public Page<MessageDto> findMessagesByContactId(@PathVariable String receiverPhoneNumber,
 //                                                    @PathVariable int pageNumber) {
