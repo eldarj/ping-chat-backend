@@ -15,7 +15,7 @@ public class UnreadMessagesInMemoryService {
         return unreadMessages.get(userPhoneNumber);
     }
 
-    public void add(MessageDto messageDto, String senderPhoneNumber, String receiverPhoneNumber) {
+    public int add(MessageDto messageDto, String senderPhoneNumber, String receiverPhoneNumber) {
         Map<String, Map<Long, MessageDto>> receiverMessages = unreadMessages.get(receiverPhoneNumber);
 
         Map<Long, MessageDto> receiverMessagesBySender;
@@ -37,6 +37,10 @@ public class UnreadMessagesInMemoryService {
         }
 
         receiverMessagesBySender.put(messageDto.getId(), messageDto);
+
+        int totalUnreadMessages = receiverMessagesBySender.size();
+
+        return totalUnreadMessages;
     }
 
     public void remove(long messageId, String senderPhoneNumber, String receiverPhoneNumber) {

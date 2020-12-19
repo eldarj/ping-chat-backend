@@ -52,4 +52,6 @@ public class MessageDto implements Serializable {
     private boolean isDeleted;
 
     private MessageType messageType = MessageType.TEXT_MESSAGE;
+
+    private int totalUnreadMessages;
 }

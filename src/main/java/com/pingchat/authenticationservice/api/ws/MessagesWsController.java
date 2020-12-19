@@ -40,7 +40,11 @@ public class MessagesWsController {
 
         String senderPhoneNumber = senderPrincipal.getName();
         String receiverPhoneNumber = messageDto.getReceiver().getFullPhoneNumber();
-        unreadMessagesInMemoryService.add(messageDto, receiverPhoneNumber, senderPhoneNumber);
+
+        int totalUnreadMessages = unreadMessagesInMemoryService.add(
+                messageDto, senderPhoneNumber, receiverPhoneNumber);
+
+        messageDto.setTotalUnreadMessages(totalUnreadMessages);
 
         simpMessagingTemplate.convertAndSendToUser(senderPhoneNumber, "/messages/sent",
                 messageDto);
@@ -55,7 +59,7 @@ public class MessagesWsController {
 
         messageDataService.updateToReceived(messageId);
 
-        unreadMessagesInMemoryService.remove(messageId, senderPhoneNumber, receiverPrincipal.getName());
+//        unreadMessagesInMemoryService.remove(messageId, senderPhoneNumber, receiverPrincipal.getName());
 
         simpMessagingTemplate.convertAndSendToUser(senderPhoneNumber, "/messages/received",
                 messageId);
