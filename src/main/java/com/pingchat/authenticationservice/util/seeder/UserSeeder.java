@@ -219,8 +219,20 @@ public class UserSeeder implements CommandLineRunner {
             messageEntity2.setFilePath("/data/user/0/com.eldarjahijagic.ping.flutterping/cache/file_picker/person1.jpeg");
             messageEntity2.setFileUrl("http://192.168.1.4:8089/files/uploads/person1.jpeg");
             messageEntity2.setMessageType(MessageType.IMAGE);
-            messageEntity.setSeen(false);
+            messageEntity2.setSeen(false);
             messageRepository.save(messageEntity2);
+
+            // Seed image2 (don't display this on the sender, but do download on receiver)
+            messageEntity.setId(0);
+            messageEntity.setSentTimestamp(Instant.now().toEpochMilli());
+            messageEntity.setFileName("person1.jpeg");
+            messageEntity.setFilePath("/data/user/0/com.eldarjahijagic.ping" +
+                    ".flutterping/cache/file_picker/wrongdir/person1.jpeg");
+            messageEntity.setFileUrl("http://192.168.1.4:8089/files/uploads/person1.jpeg");
+            messageEntity.setMessageType(MessageType.IMAGE);
+            messageEntity.setDeleted(true);
+            messageEntity.setSeen(false);
+            messageRepository.save(messageEntity);
 
             // Seed users and contacts
             for (int i = 0; i < 70; i++) {

@@ -51,7 +51,11 @@ public class MessageEntity {
 
     private String fileUrl;
 
+    private Long fileSizeBytes;
+
     private boolean isDeleted;
 
     private MessageType messageType = MessageType.TEXT_MESSAGE;
+
+    private String recordingDuration;
 }

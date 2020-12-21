@@ -49,9 +49,13 @@ public class MessageDto implements Serializable {
 
     private String fileUrl;
 
+    private Long fileSizeBytes;
+
     private boolean isDeleted;
 
     private MessageType messageType = MessageType.TEXT_MESSAGE;
 
     private int totalUnreadMessages;
+
+    private String recordingDuration;
 }
