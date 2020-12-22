@@ -46,4 +46,8 @@ public class UserEntity {
     private Long joinedTimestamp = Instant.now().toEpochMilli();
 
     private String profileImagePath;
+
+    private long sentNodeId;
+
+    private long receivedNodeId;
 }

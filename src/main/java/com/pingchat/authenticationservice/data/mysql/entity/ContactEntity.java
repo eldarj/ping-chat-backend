@@ -43,7 +43,7 @@ public class ContactEntity {
 
     private boolean isFavorite;
 
-    private boolean contactUserExists;
+    private boolean contactUserExists; //TODO: Handle this
 
     @NotNull
     private Long addedTimestamp = Instant.now().toEpochMilli();

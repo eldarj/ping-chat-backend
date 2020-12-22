@@ -1,14 +1,10 @@
 package com.pingchat.authenticationservice.util.seeder;
 
-import com.pingchat.authenticationservice.data.mysql.entity.ContactEntity;
-import com.pingchat.authenticationservice.data.mysql.entity.CountryCodeEntity;
-import com.pingchat.authenticationservice.data.mysql.entity.MessageEntity;
-import com.pingchat.authenticationservice.data.mysql.entity.UserEntity;
-import com.pingchat.authenticationservice.data.mysql.repository.ContactRepository;
-import com.pingchat.authenticationservice.data.mysql.repository.CountryCodeRepository;
-import com.pingchat.authenticationservice.data.mysql.repository.MessageRepository;
-import com.pingchat.authenticationservice.data.mysql.repository.UserRepository;
+import com.pingchat.authenticationservice.data.mysql.entity.*;
+import com.pingchat.authenticationservice.data.mysql.repository.*;
 import com.pingchat.authenticationservice.enums.MessageType;
+import com.pingchat.authenticationservice.model.dto.DSNodeDto;
+import com.pingchat.authenticationservice.service.data.DataSpaceDataService;
 import com.pingchat.authenticationservice.util.UniqueUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -27,6 +23,7 @@ public class UserSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final ContactRepository contactRepository;
     private final MessageRepository messageRepository;
+    private final DataSpaceDataService dataSpaceDataService;
 
     private final List<String> seedingFirstNames = List.of(
             "Alen", "Dino", "Admir", "Kenan","Berina","Emina", "Belma", "Samra",
@@ -82,11 +79,13 @@ public class UserSeeder implements CommandLineRunner {
     public UserSeeder(CountryCodeRepository countryCodeRepository,
                       UserRepository userRepository,
                       ContactRepository contactRepository,
-                      MessageRepository messageRepository) {
+                      MessageRepository messageRepository,
+                      DataSpaceDataService dataSpaceDataService) {
         this.userRepository = userRepository;
         this.countryCodeRepository = countryCodeRepository;
         this.contactRepository = contactRepository;
         this.messageRepository = messageRepository;
+        this.dataSpaceDataService = dataSpaceDataService;
     }
 
     @Override
@@ -113,16 +112,18 @@ public class UserSeeder implements CommandLineRunner {
 
             userEntity.setProfileImagePath("https://media-exp1.licdn.com/dms/image/C5603AQH9KNis_BzaRA/profile-displayphoto-shrink_100_100/0?e=1608768000&v=beta&t=-A__OpLiqt5XbBcRDSoDJdgOjsUszXHJzxhkp8jTMrs");
 
-            UserEntity savedUserEntity = userRepository.save(userEntity);
+            userEntity = userRepository.save(userEntity);
+            dataSpaceDataService.createRootNodes(userEntity);
 
             UserEntity userEntity2 = new UserEntity();
             userEntity2.setCountryCode(countryCodeEntity);
             userEntity2.setPhoneNumber("62154973");
-            userEntity2.setFirstName("Sabaha");
+            userEntity2.setFirstName("Sabaha \uD83E\uDD29");
             userEntity2.setLastName("Jahijagic");
-            userRepository.save(userEntity2);
+            userEntity2 = userRepository.save(userEntity2);
+            dataSpaceDataService.createRootNodes(userEntity2);
 
-            log.info("Saved user {}", savedUserEntity);
+            log.info("Saved user {}", userEntity);
 
             // Seedcontacts and messages
             long contactBindingId = UniqueUtil.nextUniqueLong();

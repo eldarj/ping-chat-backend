@@ -1,5 +1,8 @@
 package com.pingchat.authenticationservice.api.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pingchat.authenticationservice.model.dto.DSNodeDto;
+import com.pingchat.authenticationservice.service.data.DataSpaceDataService;
 import lombok.extern.slf4j.Slf4j;
 import me.desair.tus.server.TusFileUploadService;
 import me.desair.tus.server.exception.TusException;
@@ -20,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -32,8 +36,21 @@ public class DataSpaceController {
 
     private final TusFileUploadService tusFileUploadService;
 
-    public DataSpaceController(TusFileUploadService tusFileUploadService) {
+    private final DataSpaceDataService dataSpaceDataService;
+
+    private final ObjectMapper objectMapper;
+
+    public DataSpaceController(TusFileUploadService tusFileUploadService,
+                               DataSpaceDataService dataSpaceDataService,
+                               ObjectMapper objectMapper) {
         this.tusFileUploadService = tusFileUploadService;
+        this.dataSpaceDataService = dataSpaceDataService;
+        this.objectMapper = objectMapper;
+    }
+
+    @GetMapping
+    public List<DSNodeDto> getSharedDataSpace(@RequestParam Long userId, @RequestParam Long contactId) {
+        return dataSpaceDataService.getSharedData(userId, contactId);
     }
 
     @RequestMapping(value = {"/upload", "/upload/**"},
@@ -48,13 +65,21 @@ public class DataSpaceController {
         if (uploadInfo != null && !uploadInfo.isUploadInProgress()) {
 
             try (InputStream inputStream = this.tusFileUploadService.getUploadedBytes(uploadUrl)) {
-                Path output = Paths.get(staticBasePath + "/uploads").resolve(uploadInfo.getFileName());
+                String fileName = uploadInfo.getFileName();
+                String fileUrl = "http://192.168.1.4:8089/files/uploads/" + fileName;
+
+                Path output = Paths.get(staticBasePath + "/uploads").resolve(fileName);
                 Files.copy(inputStream, output, StandardCopyOption.REPLACE_EXISTING);
 
-                servletResponse.setHeader(X_LOCATION_HEADER_KEY,
-                        "http://192.168.1.4:8089/files/uploads/" + uploadInfo.getFileName());
+                String dsNodeEncoded = uploadInfo.getMetadata().get("dsNodeEncoded");
+                DSNodeDto dsNodeDto = objectMapper.readValue(dsNodeEncoded, DSNodeDto.class);
+                dsNodeDto.setNodePath(output.toString());
 
-                log.info("Saved uploaded file to {}", output.toString());
+                dataSpaceDataService.create(dsNodeDto);
+
+                servletResponse.setHeader(X_LOCATION_HEADER_KEY, fileUrl);
+
+                log.info("Uploaded file to {}", output.toString());
             }
 
             this.tusFileUploadService.deleteUpload(uploadUrl);

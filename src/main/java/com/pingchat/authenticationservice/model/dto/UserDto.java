@@ -27,6 +27,10 @@ public class UserDto implements Serializable {
 
     private String profileImagePath;
 
+    private long sentNodeId;
+
+    private long receivedNodeId;
+
     public String getFullPhoneNumber() {
         return this.countryCode.getDialCode() + this.phoneNumber;
     }
