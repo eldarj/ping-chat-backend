@@ -1,8 +1,8 @@
 package com.pingchat.authenticationservice.api.ws;
 
-
 import com.pingchat.authenticationservice.model.dto.MessageDto;
 import com.pingchat.authenticationservice.model.dto.MessageStatusChangeDto;
+import com.pingchat.authenticationservice.service.data.DataSpaceDataService;
 import com.pingchat.authenticationservice.service.data.MessageDataService;
 import com.pingchat.authenticationservice.service.memory.UnreadMessagesInMemoryService;
 import lombok.extern.slf4j.Slf4j;
@@ -23,13 +23,16 @@ public class MessagesWsController {
     private final UnreadMessagesInMemoryService unreadMessagesInMemoryService;
 
     private final MessageDataService messageDataService;
+    private final DataSpaceDataService dataSpaceDataService;
 
     public MessagesWsController(SimpMessagingTemplate simpMessagingTemplate,
                                 UnreadMessagesInMemoryService unreadMessagesInMemoryService,
-                                MessageDataService messageDataService) {
+                                MessageDataService messageDataService,
+                                DataSpaceDataService dataSpaceDataService) {
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.unreadMessagesInMemoryService = unreadMessagesInMemoryService;
         this.messageDataService = messageDataService;
+        this.dataSpaceDataService = dataSpaceDataService;
     }
 
     @MessageMapping("/messages/send")
@@ -86,10 +89,8 @@ public class MessagesWsController {
 
     @MessageMapping("/messages/deleted")
     public void messageDeleted(@Payload MessageDto messageDto) {
-        messageDto.setDeleted(true);
-        messageDataService.deleteById(messageDto.getId());
-
-        simpMessagingTemplate.convertAndSendToUser(messageDto.getReceiver().getFullPhoneNumber(), "/messages/deleted",
+        String receiverPhoneNumber = messageDto.getReceiver().getFullPhoneNumber();
+        simpMessagingTemplate.convertAndSendToUser(receiverPhoneNumber, "/messages/deleted",
                 messageDto);
     }
 }

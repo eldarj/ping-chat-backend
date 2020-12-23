@@ -1,6 +1,7 @@
 package com.pingchat.authenticationservice.data.mysql.repository;
 
 import com.pingchat.authenticationservice.data.mysql.entity.MessageEntity;
+import com.pingchat.authenticationservice.model.dto.MessageDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,7 +40,7 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 
     @Modifying
     @Query("UPDATE MessageEntity m SET m.isDeleted = true WHERE m.id = :messageId")
-    void deleteMessage(Long messageId);
+    void setToDeleted(long messageId);
 
 //    Page<MessageEntity> findAllBySenderIdAndReceiverId(long senderId, long receiverId, Pageable pageable);
 //

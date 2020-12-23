@@ -33,6 +33,8 @@ public class DSNodeDto implements Serializable {
 
     private Long fileSizeBytes;
 
+    private String uploadId;
+
     private boolean isDirectory;
 
     private Long createdTimestamp = Instant.now().toEpochMilli();

@@ -37,8 +37,14 @@ public class DSNodeEntity {
 
     private boolean isDirectory;
 
+    private String uploadId;
+
     @NotNull
     private Long createdTimestamp = Instant.now().toEpochMilli();
 
     private Long lastModifiedTimestamp = Instant.now().toEpochMilli();
+
+    private boolean deletedByOwner;
+
+    private boolean deletedByReceiver;
 }

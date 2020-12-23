@@ -9,8 +9,10 @@ import com.pingchat.authenticationservice.model.dto.DSNodeDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -51,5 +53,36 @@ public class DataSpaceDataService {
 
     public List<DSNodeDto> getSharedData(Long userId, Long anotherUserId) {
         return objectMapper.convertValue(dsNodeRepository.findSharedDataByUsers(userId, anotherUserId), List.class);
+    }
+
+    @Transactional
+    public void setOwnerDeletedById(Long nodeId) {
+        Optional<DSNodeEntity> dsNodeOptional = dsNodeRepository.findById(nodeId);
+        if (dsNodeOptional.isPresent()) {
+            DSNodeEntity dsNodeEntity = dsNodeOptional.get();
+            if (dsNodeEntity.isDeletedByReceiver()) {
+                dsNodeRepository.delete(dsNodeEntity);
+            } else {
+                dsNodeRepository.setDeletedByOwner(nodeId);
+            }
+        }
+    }
+
+    @Transactional
+    public void setReceiverDeletedById(Long nodeId) {
+        Optional<DSNodeEntity> dsNodeOptional = dsNodeRepository.findById(nodeId);
+        if (dsNodeOptional.isPresent()) {
+            DSNodeEntity dsNodeEntity = dsNodeOptional.get();
+            if (dsNodeEntity.isDeletedByOwner()) {
+                dsNodeRepository.delete(dsNodeEntity);
+            } else {
+                dsNodeRepository.setDeletedByReceiver(nodeId);
+            }
+        }
+    }
+
+    @Transactional
+    public void deleteByUploadId(String uploadId) {
+        dsNodeRepository.deleteByUploadId(uploadId);
     }
 }

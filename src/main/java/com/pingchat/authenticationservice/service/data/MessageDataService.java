@@ -9,7 +9,6 @@ import com.pingchat.authenticationservice.model.event.PresenceEvent;
 import com.pingchat.authenticationservice.service.memory.PresenceInMemoryService;
 import com.pingchat.authenticationservice.util.pagination.PagedSearchResult;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -36,6 +35,10 @@ public class MessageDataService {
         this.messageRepository = messageRepository;
         this.objectMapper = objectMapper;
         this.presenceInMemoryService = presenceInMemoryService;
+    }
+
+    public MessageDto findById(Long messageId) {
+        return objectMapper.convertValue(messageRepository.findById(messageId), MessageDto.class);
     }
 
     public PagedSearchResult<MessageDto> findRecentSentOrReceived(Long userId, int pageSize, int pageNumber) {
@@ -94,9 +97,10 @@ public class MessageDataService {
     }
 
     @Transactional
-    public void deleteById(Long messageId) {
-        messageRepository.deleteMessage(messageId);
+    public void setDeleted(long messageId) {
+        messageRepository.setToDeleted(messageId);
     }
+
 
 //    public Page<MessageDto> findBySenderOrReceiver(String senderPhoneNumber,
 //                                                   String receiverPhoneNumber,

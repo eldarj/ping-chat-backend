@@ -1,22 +1,38 @@
 package com.pingchat.authenticationservice.api.rest;
 
+import com.pingchat.authenticationservice.api.ws.MessagesWsController;
+import com.pingchat.authenticationservice.auth.util.SecurityContextUserProvider;
 import com.pingchat.authenticationservice.model.dto.MessageDto;
-import com.pingchat.authenticationservice.service.data.ContactDataService;
+import com.pingchat.authenticationservice.service.data.DataSpaceDataService;
 import com.pingchat.authenticationservice.service.data.MessageDataService;
+import com.pingchat.authenticationservice.service.files.StaticFileStorageService;
 import com.pingchat.authenticationservice.util.pagination.PagedSearchResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.util.Objects;
+import java.util.Optional;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/messages")
 public class MessagesController {
     private final MessageDataService messageDataService;
+    private final StaticFileStorageService staticFileStorageService;
+    private final DataSpaceDataService dataSpaceDataService;
+    private final MessagesWsController messagesWsController;
 
-    public MessagesController(MessageDataService messageDataService) {
+    public MessagesController(MessageDataService messageDataService,
+                              StaticFileStorageService staticFileStorageService,
+                              DataSpaceDataService dataSpaceDataService,
+                              MessagesWsController messagesWsController) {
         this.messageDataService = messageDataService;
+        this.staticFileStorageService = staticFileStorageService;
+        this.dataSpaceDataService = dataSpaceDataService;
+        this.messagesWsController = messagesWsController;
     }
 
     @GetMapping
@@ -38,19 +54,25 @@ public class MessagesController {
     }
 
     @DeleteMapping("{messageId}")
-    public void deleteById(@PathVariable Long messageId) {
-        messageDataService.deleteById(messageId);
-    }
+    public void deleteById(@PathVariable Long messageId, @RequestParam("nodeId") Optional<Long> nodeIdOptional) {
+        MessageDto messageDto = messageDataService.findById(messageId);
+        messageDataService.setDeleted(messageId);
+        messagesWsController.messageDeleted(messageDto);
 
-//    @GetMapping("/{receiverPhoneNumber}/{pageNumber}")
-//    public Page<MessageDto> findMessagesByContactId(@PathVariable String receiverPhoneNumber,
-//                                                    @PathVariable int pageNumber) {
-//        String senderPhoneNumber = SecurityContextUserProvider.currentUserPrincipal();
-//        return messageDataService.findBySenderOrReceiver(
-//                senderPhoneNumber,
-//                receiverPhoneNumber,
-//                PageRequest.of(pageNumber, 20, Sort.by(Sort.Direction.DESC, "sentTimestamp"))
-//        );
-//    }
+        if (nodeIdOptional.isPresent()) {
+            Long nodeId = nodeIdOptional.get();
+            if (Objects.equals(messageDto.getSender().getFullPhoneNumber(),
+                    SecurityContextUserProvider.currentUserPrincipal())) {
+                dataSpaceDataService.setOwnerDeletedById(nodeId);
+                try {
+                    staticFileStorageService.delete(messageDto.getFileName());
+                } catch (IOException e) {
+                    log.warn("Error deleting file: {}", messageDto.getFilePath());
+                }
+            } else {
+                dataSpaceDataService.setReceiverDeletedById(nodeId);
+            }
+        }
+    }
 }
 

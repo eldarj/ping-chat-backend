@@ -24,8 +24,19 @@ public class StaticFileStorageService {
     @Value("${service.profile-images-path}")
     private String profileImagesPath;
 
+    @Getter
+    @Setter
+    @Value("${service.static-base-path}")
+    private String staticBasePath;
+
     private static final int SCALE_IMAGE_TO_SIZE = 150;
 
+    public void delete(String fileName) throws IOException {
+        Files.deleteIfExists(Paths.get(staticBasePath + "/uploads/" + fileName));
+    }
+
+    //
+    
     public String saveProfileImage(MultipartFile file) throws IOException {
         // Create file by path
         String[] split = file.getOriginalFilename().split("/");

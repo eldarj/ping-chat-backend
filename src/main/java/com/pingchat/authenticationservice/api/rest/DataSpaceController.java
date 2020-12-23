@@ -33,11 +33,10 @@ public class DataSpaceController {
     protected String staticBasePath;
 
     private static final String X_LOCATION_HEADER_KEY = "X-Location";
+    private static final String X_NODE_ID_HEADER_KEY = "X-NodeId";
 
     private final TusFileUploadService tusFileUploadService;
-
     private final DataSpaceDataService dataSpaceDataService;
-
     private final ObjectMapper objectMapper;
 
     public DataSpaceController(TusFileUploadService tusFileUploadService,
@@ -74,10 +73,12 @@ public class DataSpaceController {
                 String dsNodeEncoded = uploadInfo.getMetadata().get("dsNodeEncoded");
                 DSNodeDto dsNodeDto = objectMapper.readValue(dsNodeEncoded, DSNodeDto.class);
                 dsNodeDto.setNodePath(output.toString());
+                dsNodeDto.setUploadId(uploadInfo.getId().toString());
 
-                dataSpaceDataService.create(dsNodeDto);
+                long nodeId = dataSpaceDataService.create(dsNodeDto);
 
                 servletResponse.setHeader(X_LOCATION_HEADER_KEY, fileUrl);
+                servletResponse.setHeader(X_NODE_ID_HEADER_KEY, String.valueOf(nodeId));
 
                 log.info("Uploaded file to {}", output.toString());
             }
@@ -99,10 +100,10 @@ public class DataSpaceController {
         if (uploadInfo != null) {
             Files.deleteIfExists(Paths.get(staticBasePath + "/uploads").resolve(uploadInfo.getFileName()));
             this.tusFileUploadService.deleteUpload(uploadUrl);
-
         } else if (StringUtils.hasLength(fileName)) {
             Files.deleteIfExists(Paths.get(staticBasePath + "/uploads").resolve(fileName));
         }
+        dataSpaceDataService.deleteByUploadId(uploadUrl);
 
         return ResponseEntity.noContent().build();
     }
