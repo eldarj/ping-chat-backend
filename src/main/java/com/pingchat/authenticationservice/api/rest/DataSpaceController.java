@@ -89,7 +89,7 @@ public class DataSpaceController {
 
     @Retryable(value = UploadAlreadyLockedException.class, backoff = @Backoff(delay = 10_000L))
     @DeleteMapping("/upload/{uploadUrl}")
-    public ResponseEntity<Object> delete(@PathVariable String uploadUrl, @RequestParam String fileName)
+    public ResponseEntity<Object> deleteDuringUpload(@PathVariable String uploadUrl, @RequestParam String fileName)
             throws IOException, TusException {
         UploadInfo uploadInfo = this.tusFileUploadService.getUploadInfo(uploadUrl);
 
@@ -106,5 +106,12 @@ public class DataSpaceController {
         dataSpaceDataService.deleteByUploadId(uploadUrl);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping
+    public void delete(@RequestParam String nodeId, @RequestParam String fileName)
+            throws IOException {
+        dataSpaceDataService.deleteByNodeId(Long.parseLong(nodeId));
+        Files.deleteIfExists(Paths.get(staticBasePath + "/uploads").resolve(fileName));
     }
 }

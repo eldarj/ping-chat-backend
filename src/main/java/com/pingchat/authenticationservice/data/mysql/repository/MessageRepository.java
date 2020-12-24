@@ -42,6 +42,8 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     @Query("UPDATE MessageEntity m SET m.isDeleted = true WHERE m.id = :messageId")
     void setToDeleted(long messageId);
 
+    void deleteByNodeId(Long nodeId);
+
 //    Page<MessageEntity> findAllBySenderIdAndReceiverId(long senderId, long receiverId, Pageable pageable);
 //
 //    Page<MessageEntity> findAllBySenderIdInAndReceiverIdIn(Collection<Long> senderReceiver,

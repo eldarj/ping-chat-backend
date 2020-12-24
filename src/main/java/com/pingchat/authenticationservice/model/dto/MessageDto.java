@@ -58,4 +58,6 @@ public class MessageDto implements Serializable {
     private int totalUnreadMessages;
 
     private String recordingDuration;
+
+    private Long nodeId;
 }

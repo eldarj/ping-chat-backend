@@ -1,5 +1,7 @@
 package com.pingchat.authenticationservice.model.dto;
 
+import com.pingchat.authenticationservice.enums.DSNodeType;
+import com.pingchat.authenticationservice.enums.MessageType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,6 +38,10 @@ public class DSNodeDto implements Serializable {
     private String uploadId;
 
     private boolean isDirectory;
+
+    private DSNodeType nodeType = DSNodeType.IMAGE;
+
+    private String recordingDuration;
 
     private Long createdTimestamp = Instant.now().toEpochMilli();
 

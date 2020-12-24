@@ -54,13 +54,13 @@ public class MessagesController {
     }
 
     @DeleteMapping("{messageId}")
-    public void deleteById(@PathVariable Long messageId, @RequestParam("nodeId") Optional<Long> nodeIdOptional) {
+    public void deleteById(@PathVariable Long messageId) {
         MessageDto messageDto = messageDataService.findById(messageId);
         messageDataService.setDeleted(messageId);
         messagesWsController.messageDeleted(messageDto);
 
-        if (nodeIdOptional.isPresent()) {
-            Long nodeId = nodeIdOptional.get();
+        Long nodeId = messageDto.getNodeId();
+        if (nodeId != null) {
             if (Objects.equals(messageDto.getSender().getFullPhoneNumber(),
                     SecurityContextUserProvider.currentUserPrincipal())) {
                 dataSpaceDataService.setOwnerDeletedById(nodeId);

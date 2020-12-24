@@ -58,4 +58,6 @@ public class MessageEntity {
     private MessageType messageType = MessageType.TEXT_MESSAGE;
 
     private String recordingDuration;
+
+    private Long nodeId;
 }

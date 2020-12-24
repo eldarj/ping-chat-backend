@@ -1,5 +1,6 @@
 package com.pingchat.authenticationservice.data.mysql.entity;
 
+import com.pingchat.authenticationservice.enums.DSNodeType;
 import com.pingchat.authenticationservice.enums.MessageType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,9 +36,13 @@ public class DSNodeEntity {
 
     private Long fileSizeBytes;
 
+    private String uploadId;
+
     private boolean isDirectory;
 
-    private String uploadId;
+    private DSNodeType nodeType = DSNodeType.IMAGE;
+
+    private String recordingDuration;
 
     @NotNull
     private Long createdTimestamp = Instant.now().toEpochMilli();
