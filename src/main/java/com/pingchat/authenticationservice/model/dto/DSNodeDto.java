@@ -23,7 +23,7 @@ public class DSNodeDto implements Serializable {
 
     private long receiverId;
 
-    private long parentDirectoryNodeId;
+    private Long parentDirectoryNodeId;
 
     private String nodeName;
 
@@ -36,8 +36,6 @@ public class DSNodeDto implements Serializable {
     private Long fileSizeBytes;
 
     private String uploadId;
-
-    private boolean isDirectory;
 
     private DSNodeType nodeType = DSNodeType.IMAGE;
 

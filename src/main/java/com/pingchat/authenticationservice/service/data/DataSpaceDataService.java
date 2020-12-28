@@ -6,6 +6,7 @@ import com.pingchat.authenticationservice.data.mysql.entity.UserEntity;
 import com.pingchat.authenticationservice.data.mysql.repository.DataSpaceNodeRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.MessageRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.UserRepository;
+import com.pingchat.authenticationservice.enums.DSNodeType;
 import com.pingchat.authenticationservice.model.dto.DSNodeDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,26 +34,39 @@ public class DataSpaceDataService {
         this.objectMapper = objectMapper;
     }
 
-    public long create(DSNodeDto dsNodeDto) {
+    public DSNodeDto create(DSNodeDto dsNodeDto) {
         dsNodeDto.setCreatedTimestamp(Instant.now().toEpochMilli());
         dsNodeDto.setLastModifiedTimestamp(Instant.now().toEpochMilli());
-        return dsNodeRepository.save(objectMapper.convertValue(dsNodeDto, DSNodeEntity.class)).getId();
+
+        DSNodeEntity dsNodeEntity = objectMapper.convertValue(dsNodeDto, DSNodeEntity.class);
+        dsNodeEntity = dsNodeRepository.save(dsNodeEntity);
+
+        return objectMapper.convertValue(dsNodeEntity, DSNodeDto.class);
     }
 
     public void createRootNodes(UserEntity userEntity) {
-        long sentId = create(DSNodeDto.builder()
+        DSNodeDto sentDirectory = create(DSNodeDto.builder()
                 .nodeName("Sent")
-                .isDirectory(true)
+                .nodeType(DSNodeType.DIRECTORY)
                 .ownerId(userEntity.getId())
                 .build());
-        long receivedId = create(DSNodeDto.builder()
+        DSNodeDto receivedDirectory = create(DSNodeDto.builder()
                 .nodeName("Received")
-                .isDirectory(true)
+                .nodeType(DSNodeType.DIRECTORY)
                 .ownerId(userEntity.getId())
                 .build());
-        userEntity.setSentNodeId(sentId);
-        userEntity.setReceivedNodeId(receivedId);
+        userEntity.setSentNodeId(sentDirectory.getId());
+        userEntity.setReceivedNodeId(receivedDirectory.getId());
         userRepository.save(userEntity);
+    }
+
+    public List<DSNodeDto> getDataSpace(Long userId) {
+        return objectMapper.convertValue(dsNodeRepository.findAllByOwnerIdAndParentDirectoryNodeIdIsNull(userId),
+                List.class);
+    }
+
+    public List<DSNodeDto> getDirectory(Long userId, Long directoryId) {
+        return objectMapper.convertValue(dsNodeRepository.findAllByParentDirectoryNodeId(directoryId), List.class);
     }
 
     public List<DSNodeDto> getSharedData(Long userId, Long anotherUserId) {

@@ -24,7 +24,7 @@ public class DSNodeEntity {
 
     private long receiverId;
 
-    private long parentDirectoryNodeId;
+    private Long parentDirectoryNodeId;
 
     private String nodeName;
 
@@ -37,8 +37,6 @@ public class DSNodeEntity {
     private Long fileSizeBytes;
 
     private String uploadId;
-
-    private boolean isDirectory;
 
     private DSNodeType nodeType = DSNodeType.IMAGE;
 

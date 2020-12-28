@@ -47,7 +47,27 @@ public class DataSpaceController {
         this.objectMapper = objectMapper;
     }
 
-    @GetMapping
+    @GetMapping("{userId}")
+    public List<DSNodeDto> getDataSpace(@PathVariable Long userId) {
+        return dataSpaceDataService.getDataSpace(userId);
+    }
+
+    @GetMapping("{userId}/{directoryId}")
+    public List<DSNodeDto> getDirectory(@PathVariable Long userId, @PathVariable Long directoryId) {
+        return dataSpaceDataService.getDirectory(userId, directoryId);
+    }
+
+    @PostMapping("{userId}/directory")
+    public DSNodeDto createDirectory(@PathVariable Long userId, @RequestBody DSNodeDto dsNode) {
+        return dataSpaceDataService.create(dsNode);
+    }
+
+    @DeleteMapping("directory/{directoryId}")
+    public void deleteDirectory(@PathVariable Long directoryId) {
+        dataSpaceDataService.deleteByNodeId(directoryId);
+    }
+
+    @GetMapping("shared")
     public List<DSNodeDto> getSharedDataSpace(@RequestParam Long userId, @RequestParam Long contactId) {
         return dataSpaceDataService.getSharedData(userId, contactId);
     }
@@ -75,10 +95,10 @@ public class DataSpaceController {
                 dsNodeDto.setNodePath(output.toString());
                 dsNodeDto.setUploadId(uploadInfo.getId().toString());
 
-                long nodeId = dataSpaceDataService.create(dsNodeDto);
+                DSNodeDto dsNode = dataSpaceDataService.create(dsNodeDto);
 
                 servletResponse.setHeader(X_LOCATION_HEADER_KEY, fileUrl);
-                servletResponse.setHeader(X_NODE_ID_HEADER_KEY, String.valueOf(nodeId));
+                servletResponse.setHeader(X_NODE_ID_HEADER_KEY, String.valueOf(dsNode.getId()));
 
                 log.info("Uploaded file to {}", output.toString());
             }

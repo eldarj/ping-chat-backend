@@ -16,6 +16,13 @@ public interface DataSpaceNodeRepository extends JpaRepository<DSNodeEntity, Lon
             ")")
     List<DSNodeEntity> findSharedDataByUsers(Long userId, Long anotherUserId);
 
+    @Query("SELECT ds FROM DSNodeEntity ds WHERE ds.ownerId = :userId")
+    List<DSNodeEntity> findDataByUser(Long userId);
+
+    List<DSNodeEntity> findAllByParentDirectoryNodeId(Long parentDirectoryNodeId);
+
+    List<DSNodeEntity> findAllByOwnerIdAndParentDirectoryNodeIdIsNull(Long ownerId);
+
     @Modifying
     @Query("UPDATE DSNodeEntity ds SET ds.deletedByOwner = true WHERE ds.id = :messageId")
     void setDeletedByOwner(Long messageId);
