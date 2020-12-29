@@ -32,4 +32,6 @@ public interface DataSpaceNodeRepository extends JpaRepository<DSNodeEntity, Lon
     void setDeletedByReceiver(Long messageId);
 
     void deleteByUploadId(String uploadId);
+
+    void deleteAllByParentDirectoryNodeId(Long nodeId);
 }

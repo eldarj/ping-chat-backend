@@ -64,7 +64,7 @@ public class DataSpaceController {
 
     @DeleteMapping("directory/{directoryId}")
     public void deleteDirectory(@PathVariable Long directoryId) {
-        dataSpaceDataService.deleteByNodeId(directoryId);
+        dataSpaceDataService.deleteDirectoryByNodeId(directoryId);
     }
 
     @GetMapping("shared")

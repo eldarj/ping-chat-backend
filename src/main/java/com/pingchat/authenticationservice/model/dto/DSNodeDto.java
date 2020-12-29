@@ -29,6 +29,8 @@ public class DSNodeDto implements Serializable {
 
     private String nodePath;
 
+    private String description;
+
     private String fileUrl;
 
     private String pathOnSourceDevice;

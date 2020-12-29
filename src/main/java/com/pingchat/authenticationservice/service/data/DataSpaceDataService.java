@@ -109,4 +109,24 @@ public class DataSpaceDataService {
         dsNodeRepository.deleteById(nodeId);
         messageRepository.deleteByNodeId(nodeId);
     }
+
+    @Transactional
+    public void deleteDirectoryByNodeId(Long nodeId) {
+        Optional<DSNodeEntity> dsNodeEntityOptional = dsNodeRepository.findById(nodeId);
+
+        if (dsNodeEntityOptional.isPresent()) {
+            DSNodeEntity dsNodeEntity = dsNodeEntityOptional.get();
+            recursiveDeleteNode(dsNodeEntity);
+        }
+    }
+
+    private void recursiveDeleteNode(DSNodeEntity dsNodeEntity) {
+        dsNodeRepository.deleteById(dsNodeEntity.getId());
+        if (dsNodeEntity.getNodeType() == DSNodeType.DIRECTORY) {
+            List<DSNodeEntity> childNodes = dsNodeRepository.findAllByParentDirectoryNodeId(dsNodeEntity.getId());
+            for (DSNodeEntity child : childNodes) {
+                recursiveDeleteNode(child);
+            }
+        }
+    }
 }
