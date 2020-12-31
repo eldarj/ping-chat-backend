@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -68,8 +69,14 @@ public class DataSpaceController {
     }
 
     @GetMapping("shared")
-    public List<DSNodeDto> getSharedDataSpace(@RequestParam Long userId, @RequestParam Long contactId) {
-        return dataSpaceDataService.getSharedData(userId, contactId);
+    public List<DSNodeDto> getSharedDataSpace(@RequestParam Long userId,
+                                              @RequestParam Long contactId,
+                                              @RequestParam Optional<Long> nodesCount) {
+        if (nodesCount.isPresent()) {
+            return dataSpaceDataService.getSharedData(userId, contactId, nodesCount.get());
+        } else {
+            return dataSpaceDataService.getSharedData(userId, contactId);
+        }
     }
 
     @RequestMapping(value = {"/upload", "/upload/**"},

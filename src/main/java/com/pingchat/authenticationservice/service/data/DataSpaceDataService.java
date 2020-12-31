@@ -73,6 +73,11 @@ public class DataSpaceDataService {
         return objectMapper.convertValue(dsNodeRepository.findSharedDataByUsers(userId, anotherUserId), List.class);
     }
 
+    public List<DSNodeDto> getSharedData(Long userId, Long anotherUserId, Long nodesCount) {
+        return objectMapper.convertValue(dsNodeRepository.findSharedDataByUsersLimit(userId, anotherUserId, nodesCount),
+                List.class);
+    }
+
     @Transactional
     public void setOwnerDeletedById(Long nodeId) {
         Optional<DSNodeEntity> dsNodeOptional = dsNodeRepository.findById(nodeId);
