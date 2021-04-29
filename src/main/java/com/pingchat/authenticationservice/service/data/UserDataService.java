@@ -1,9 +1,11 @@
 package com.pingchat.authenticationservice.service.data;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pingchat.authenticationservice.data.mysql.entity.UserEntity;
 import com.pingchat.authenticationservice.data.mysql.repository.UserRepository;
+import com.pingchat.authenticationservice.model.dto.FsUser;
 import com.pingchat.authenticationservice.model.dto.UserDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -21,6 +24,12 @@ public class UserDataService {
     public UserDataService(UserRepository userRepository, ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.objectMapper = objectMapper;
+    }
+
+    public List<String> findAllFsUsers() throws IOException {
+        List<UserEntity> all = userRepository.findAll();
+        return all.stream().map(user -> user.getCountryCode().getDialCode() + user.getPhoneNumber())
+                .collect(Collectors.toList());
     }
 
     public List<UserDto> findAll() throws IOException {

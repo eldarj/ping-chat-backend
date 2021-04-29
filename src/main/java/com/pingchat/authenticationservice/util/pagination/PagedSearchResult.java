@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -12,4 +13,11 @@ import java.util.List;
 public class PagedSearchResult<T> {
     private List<T> page;
     private Long totalElements;
+
+    private Map<String, Object> additionalData;
+
+    public PagedSearchResult(List<T> page, Long totalElements) {
+        this.page = page;
+        this.totalElements = totalElements;
+    }
 }

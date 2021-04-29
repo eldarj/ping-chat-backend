@@ -16,12 +16,14 @@ public class SecurityFilterBeans {
     public static final String AUTHENTICATION_ENDPOINT = "/api/authenticate";
     public static final String COUNTRY_CODES_ENDPOINT = "/api/country-codes";
     public static final String DATA_SPACE_ENDPOINT = "/api/data-space/upload";
+    public static final String FREESWITCH_ENDPOINT = "/api/freeswitch";
     public static final String STATIC_FILES_ENDPOINT = "/files";
 
     public static final Set<String> PUBLIC_ENDPOINTS = Set.of(
             AUTHENTICATION_ENDPOINT,
             COUNTRY_CODES_ENDPOINT,
             DATA_SPACE_ENDPOINT,
+            FREESWITCH_ENDPOINT,
             STATIC_FILES_ENDPOINT
     );
 

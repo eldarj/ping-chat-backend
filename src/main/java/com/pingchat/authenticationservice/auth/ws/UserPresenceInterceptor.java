@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
@@ -12,6 +13,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -38,8 +40,22 @@ public class UserPresenceInterceptor implements ChannelInterceptor {
         if (userPhoneNumber != null) {
             PresenceEvent presenceEvent = PRESENCE_EVENTS_BY_STOMP_COMMAND.get(command);
             if (presenceEvent != null) {
-                presenceEvent.setUserPhoneNumber(userPhoneNumber.getName());
-                applicationEventPublisher.publishEvent(presenceEvent);
+                boolean isActive = true;
+
+                MessageHeaders messageHeaders = message.getHeaders();
+                Map<String, List<String>> nativeHeaders = messageHeaders.get("nativeHeaders", Map.class);
+                if (nativeHeaders != null) {
+                    List<String> isActiveHeader = nativeHeaders.get("isActiveHeader");
+                    try {
+                        isActive = Boolean.parseBoolean(isActiveHeader.get(0));
+                    } catch (Exception ignored) {
+                    }
+                }
+
+                if (isActive) {
+                    presenceEvent.setUserPhoneNumber(userPhoneNumber.getName());
+                    applicationEventPublisher.publishEvent(presenceEvent);
+                }
             }
         }
     }

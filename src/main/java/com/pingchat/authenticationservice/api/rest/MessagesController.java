@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Objects;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -37,12 +36,12 @@ public class MessagesController {
 
     @GetMapping
     public PagedSearchResult<MessageDto> findMessagesByUsers(@RequestParam Long userId,
-                                                             @RequestParam Long anotherUserId,
+                                                             @RequestParam Long contactUserId,
                                                              @RequestParam Integer pageSize,
                                                              @RequestParam Integer pageNumber) {
         long startTime = System.nanoTime();
 
-        PagedSearchResult<MessageDto> userMessagesPage = messageDataService.findMessagesByUsers(userId, anotherUserId,
+        PagedSearchResult<MessageDto> userMessagesPage = messageDataService.findMessagesByUsers(userId, contactUserId,
                 PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "sentTimestamp")));
 
         long endTime = System.nanoTime();

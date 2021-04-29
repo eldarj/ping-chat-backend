@@ -69,6 +69,10 @@ public class DataSpaceDataService {
         return objectMapper.convertValue(dsNodeRepository.findAllByParentDirectoryNodeId(directoryId), List.class);
     }
 
+    public List<DSNodeDto> getAllReceived(Long userId) {
+        return objectMapper.convertValue(dsNodeRepository.findAllByReceiverId(userId), List.class);
+    }
+
     public List<DSNodeDto> getSharedData(Long userId, Long anotherUserId) {
         return objectMapper.convertValue(dsNodeRepository.findSharedDataByUsers(userId, anotherUserId), List.class);
     }

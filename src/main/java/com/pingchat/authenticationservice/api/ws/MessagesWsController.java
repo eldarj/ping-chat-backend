@@ -1,7 +1,9 @@
 package com.pingchat.authenticationservice.api.ws;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.pingchat.authenticationservice.model.dto.MessageDto;
 import com.pingchat.authenticationservice.model.dto.MessageStatusChangeDto;
+import com.pingchat.authenticationservice.service.FirebaseService;
 import com.pingchat.authenticationservice.service.data.DataSpaceDataService;
 import com.pingchat.authenticationservice.service.data.MessageDataService;
 import com.pingchat.authenticationservice.service.memory.UnreadMessagesInMemoryService;
@@ -25,18 +27,23 @@ public class MessagesWsController {
     private final MessageDataService messageDataService;
     private final DataSpaceDataService dataSpaceDataService;
 
+    private final FirebaseService firebaseService;
+
     public MessagesWsController(SimpMessagingTemplate simpMessagingTemplate,
                                 UnreadMessagesInMemoryService unreadMessagesInMemoryService,
                                 MessageDataService messageDataService,
-                                DataSpaceDataService dataSpaceDataService) {
+                                DataSpaceDataService dataSpaceDataService,
+                                FirebaseService firebaseService) {
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.unreadMessagesInMemoryService = unreadMessagesInMemoryService;
         this.messageDataService = messageDataService;
         this.dataSpaceDataService = dataSpaceDataService;
+        this.firebaseService = firebaseService;
     }
 
     @MessageMapping("/messages/send")
-    public void sendMessage(@Payload MessageDto messageDto, Principal senderPrincipal) {
+    public void sendMessage(@Payload MessageDto messageDto, Principal senderPrincipal)
+            throws FirebaseMessagingException {
         messageDto.setSent(true);
 
         messageDto = messageDataService.save(messageDto);
@@ -53,6 +60,8 @@ public class MessagesWsController {
                 messageDto);
         simpMessagingTemplate.convertAndSendToUser(receiverPhoneNumber, "/messages/receive",
                 messageDto);
+
+        firebaseService.sendMessageNotification(messageDto);
     }
 
     @MessageMapping("/messages/received")

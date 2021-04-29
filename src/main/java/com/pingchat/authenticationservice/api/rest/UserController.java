@@ -1,6 +1,9 @@
 package com.pingchat.authenticationservice.api.rest;
 
+import com.drew.imaging.ImageProcessingException;
+import com.pingchat.authenticationservice.auth.util.SecurityContextUserProvider;
 import com.pingchat.authenticationservice.model.dto.UserDto;
+import com.pingchat.authenticationservice.service.FirebaseService;
 import com.pingchat.authenticationservice.service.data.UserDataService;
 import com.pingchat.authenticationservice.service.files.StaticFileStorageService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,15 +21,18 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    private static final String STATIC_FILES_BASE_URL = "http://192.168.1.4:8089/files/";
+    private static final String STATIC_FILES_BASE_URL = "http://192.168.0.13:8089/files/profiles/";
 
     private final UserDataService userDataService;
     private final StaticFileStorageService staticFileStorageService;
+    private final FirebaseService firebaseService;
 
     public UserController(UserDataService userDataService,
-                          StaticFileStorageService staticFileStorageService) {
+                          StaticFileStorageService staticFileStorageService,
+                          FirebaseService firebaseService) {
         this.userDataService = userDataService;
         this.staticFileStorageService = staticFileStorageService;
+        this.firebaseService = firebaseService;
     }
 
     @GetMapping
@@ -58,7 +64,8 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/profile-image")
-    public String handleFileUpload(@PathVariable long userId, @RequestParam("file") MultipartFile file) throws IOException {
+    public String handleFileUpload(@PathVariable long userId, @RequestParam("file") MultipartFile file)
+            throws IOException, ImageProcessingException {
         String newFileName = staticFileStorageService.saveProfileImage(file);
 
         String newProfileImagePath = STATIC_FILES_BASE_URL + newFileName;
@@ -71,6 +78,13 @@ public class UserController {
         }
 
         return newProfileImagePath;
+    }
+
+    @PostMapping("/firebase-token")
+    public void registerFirebaseToken(@RequestBody String firebaseToken) {
+        String currentUserPhoneNumber = SecurityContextUserProvider.currentUserPrincipal();
+        firebaseToken = firebaseToken.replaceAll("\"", "");
+        firebaseService.registerToken(currentUserPhoneNumber, firebaseToken);
     }
 
     @PostMapping("/{userId}/logout")

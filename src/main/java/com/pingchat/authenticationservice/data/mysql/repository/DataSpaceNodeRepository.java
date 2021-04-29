@@ -32,6 +32,8 @@ public interface DataSpaceNodeRepository extends JpaRepository<DSNodeEntity, Lon
 
     List<DSNodeEntity> findAllByParentDirectoryNodeId(Long parentDirectoryNodeId);
 
+    List<DSNodeEntity> findAllByReceiverId(Long receiverId);
+
     List<DSNodeEntity> findAllByOwnerIdAndParentDirectoryNodeIdIsNull(Long ownerId);
 
     @Modifying

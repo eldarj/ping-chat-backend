@@ -53,6 +53,11 @@ public class DataSpaceController {
         return dataSpaceDataService.getDataSpace(userId);
     }
 
+    @GetMapping("{userId}/received")
+    public List<DSNodeDto> getReceivedDataSpace(@PathVariable Long userId) {
+        return dataSpaceDataService.getAllReceived(userId);
+    }
+
     @GetMapping("{userId}/{directoryId}")
     public List<DSNodeDto> getDirectory(@PathVariable Long userId, @PathVariable Long directoryId) {
         return dataSpaceDataService.getDirectory(userId, directoryId);
@@ -92,7 +97,7 @@ public class DataSpaceController {
 
             try (InputStream inputStream = this.tusFileUploadService.getUploadedBytes(uploadUrl)) {
                 String fileName = uploadInfo.getFileName();
-                String fileUrl = "http://192.168.1.4:8089/files/uploads/" + fileName;
+                String fileUrl = "http://192.168.0.13:8089/files/uploads/" + fileName;
 
                 Path output = Paths.get(staticBasePath + "/uploads").resolve(fileName);
                 Files.copy(inputStream, output, StandardCopyOption.REPLACE_EXISTING);
@@ -136,8 +141,7 @@ public class DataSpaceController {
     }
 
     @DeleteMapping
-    public void delete(@RequestParam String nodeId, @RequestParam String fileName)
-            throws IOException {
+    public void delete(@RequestParam String nodeId, @RequestParam String fileName) throws IOException {
         dataSpaceDataService.deleteByNodeId(Long.parseLong(nodeId));
         Files.deleteIfExists(Paths.get(staticBasePath + "/uploads").resolve(fileName));
     }

@@ -112,23 +112,24 @@ public class UserSeeder implements CommandLineRunner {
 
             userEntity = userRepository.save(userEntity);
             dataSpaceDataService.createRootNodes(userEntity);
+            log.info("Saved user {}", userEntity);
 
             UserEntity userEntity2 = new UserEntity();
             userEntity2.setCountryCode(countryCodeEntity);
-            userEntity2.setPhoneNumber("62154973");
-            userEntity2.setFirstName("Sabaha \uD83E\uDD29");
-            userEntity2.setLastName("Jahijagic");
+            userEntity2.setPhoneNumber("62871955");
+            userEntity2.setFirstName("Berina");
+            userEntity2.setLastName("Halilovic");
+
             userEntity2 = userRepository.save(userEntity2);
             dataSpaceDataService.createRootNodes(userEntity2);
-
             log.info("Saved user {}", userEntity);
 
-            // Seedcontacts and messages
+            // Seed contacts and messages
             long contactBindingId = UniqueUtil.nextUniqueLong();
             ContactEntity contactEntity = new ContactEntity();
             contactEntity.setUser(userEntity);
             contactEntity.setContactUser(userEntity2);
-            contactEntity.setContactName(userEntity2.getFirstName());
+            contactEntity.setContactName(userEntity2.getFirstName() + "\uD83E\uDD29");
             contactEntity.setContactPhoneNumber(userEntity2.getCountryCode().getDialCode() + userEntity2.getPhoneNumber());
             contactEntity.setContactUserExists(true);
             contactEntity.setFavorite(true);
@@ -208,28 +209,6 @@ public class UserSeeder implements CommandLineRunner {
             messageEntity.setText("panda3.png");
             messageEntity.setSentTimestamp(Instant.now().toEpochMilli());
             messageEntity.setMessageType(MessageType.STICKER);
-            messageEntity.setSeen(false);
-            messageRepository.save(messageEntity);
-
-            // Seed image
-            messageEntity2.setId(0);
-            messageEntity.setSentTimestamp(Instant.now().toEpochMilli());
-            messageEntity2.setFileName("person1.jpeg");
-            messageEntity2.setFilePath("/data/user/0/com.eldarjahijagic.ping.flutterping/cache/file_picker/person1.jpeg");
-            messageEntity2.setFileUrl("http://192.168.1.4:8089/files/uploads/person1.jpeg");
-            messageEntity2.setMessageType(MessageType.IMAGE);
-            messageEntity2.setSeen(false);
-            messageRepository.save(messageEntity2);
-
-            // Seed image2 (don't display this on the sender, but do download on receiver)
-            messageEntity.setId(0);
-            messageEntity.setSentTimestamp(Instant.now().toEpochMilli());
-            messageEntity.setFileName("person1.jpeg");
-            messageEntity.setFilePath("/data/user/0/com.eldarjahijagic.ping" +
-                    ".flutterping/cache/file_picker/wrongdir/person1.jpeg");
-            messageEntity.setFileUrl("http://192.168.1.4:8089/files/uploads/person1.jpeg");
-            messageEntity.setMessageType(MessageType.IMAGE);
-            messageEntity.setDeleted(true);
             messageEntity.setSeen(false);
             messageRepository.save(messageEntity);
 
