@@ -2,10 +2,8 @@ package com.pingchat.authenticationservice.api.rest;
 
 import com.pingchat.authenticationservice.auth.util.SecurityContextUserProvider;
 import com.pingchat.authenticationservice.model.dto.ContactDto;
-import com.pingchat.authenticationservice.model.dto.MessageDto;
 import com.pingchat.authenticationservice.service.SmsService;
 import com.pingchat.authenticationservice.service.data.ContactDataService;
-import com.pingchat.authenticationservice.service.data.MessageDataService;
 import com.pingchat.authenticationservice.util.pagination.PagedSearchResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -21,15 +19,12 @@ import java.util.Map;
 @RequestMapping("/api/contacts")
 public class ContactsController {
     private final ContactDataService contactDataService;
-    private final MessageDataService messageDataService;
 
     private final SmsService smsService;
 
     public ContactsController(ContactDataService contactDataService,
-                              MessageDataService messageDataService,
                               SmsService smsService) {
         this.contactDataService = contactDataService;
-        this.messageDataService = messageDataService;
         this.smsService = smsService;
     }
 
@@ -49,7 +44,7 @@ public class ContactsController {
         return pagedContactDtos;
     }
 
-    @GetMapping("/search")
+    @GetMapping("search")
     public List<ContactDto> findAllByNameOrPhonenumber(Long userId, String searchQuery) {
         return contactDataService.findAllByNameOrPhonenumber(userId, searchQuery);
     }
@@ -68,15 +63,20 @@ public class ContactsController {
         return response;
     }
 
+    @GetMapping("{userId}/search/{peerId}")
+    public ContactDto findByUserAndPeer(@PathVariable Long userId, @PathVariable Long peerId) {
+        return contactDataService.findByUserAndPeer(userId, peerId);
+    }
+
     @PostMapping("sync")
     public List<ContactDto> addContacts(@RequestBody List<ContactDto> contacts) {
         return contactDataService.addContacts(SecurityContextUserProvider.currentUserPrincipal(), contacts);
     }
 
-    @DeleteMapping("{contactId}/delete")
-    public void deleteContact(@PathVariable Long contactId) {
-        contactDataService.delete(contactId);
-    }
+//    @DeleteMapping("{contactId}/delete")
+//    public void deleteContact(@PathVariable Long contactId) {
+//        contactDataService.delete(contactId);
+//    }
 
     // TODO Include app download link
     @PostMapping("invite")

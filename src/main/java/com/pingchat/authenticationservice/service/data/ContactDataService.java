@@ -54,6 +54,10 @@ public class ContactDataService {
                 .collect(Collectors.toList());
     }
 
+    public ContactDto findByUserAndPeer(Long userId, Long peerId) {
+        return objectMapper.convertValue(contactRepository.findByUserIdAndContactUserId(userId, peerId), ContactDto.class);
+    }
+
     public ContactDto addContact(String currentPhoneNumber, ContactDto contactDto) {
         ContactEntity contactEntity = objectMapper.convertValue(contactDto, ContactEntity.class);
 
