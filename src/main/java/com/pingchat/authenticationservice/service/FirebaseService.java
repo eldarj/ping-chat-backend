@@ -59,14 +59,17 @@ public class FirebaseService {
 
                 String title = messageDto.getSenderContactName();
                 String senderProfileImageUrl = messageDto.getSender().getProfileImagePath();
+                MessageType messageType = messageDto.getMessageType();
 
                 String body;
-                if (messageDto.getMessageType().equals(MessageType.TEXT_MESSAGE)) {
+                if (messageType.equals(MessageType.TEXT_MESSAGE)) {
                     body = messageDto.getText();
-                } else if (messageDto.getMessageType().equals(MessageType.RECORDING)) {
+                } else if (messageType.equals(MessageType.RECORDING)) {
                     body = "Recording";
-                } else if (messageDto.getMessageType().equals(MessageType.STICKER)) {
+                } else if (messageType.equals(MessageType.STICKER)) {
                     body = "Sticker";
+                } else if (messageType.equals(MessageType.STICKER)) {
+                    body = "Location";
                 } else {
                     body = "Media";
                 }

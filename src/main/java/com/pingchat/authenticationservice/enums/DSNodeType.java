@@ -1,5 +1,10 @@
 package com.pingchat.authenticationservice.enums;
 
 public enum DSNodeType {
-    DIRECTORY, IMAGE, MEDIA, FILE, RECORDING
+    DIRECTORY,
+    IMAGE,
+    MEDIA,
+    FILE,
+    RECORDING,
+    MAP_LOCATION
 }
