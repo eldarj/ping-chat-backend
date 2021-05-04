@@ -58,6 +58,12 @@ public class ContactDataService {
         return objectMapper.convertValue(contactRepository.findByUserIdAndContactUserId(userId, peerId), ContactDto.class);
     }
 
+    public ContactDto findByUserAndPeer(String userPhoneNumber, String contactPhoneNumber) {
+        return objectMapper.convertValue(
+                contactRepository.findByUserPhoneNumberAndContactPhoneNumber(userPhoneNumber, contactPhoneNumber),
+                ContactDto.class);
+    }
+
     public ContactDto addContact(String currentPhoneNumber, ContactDto contactDto) {
         ContactEntity contactEntity = objectMapper.convertValue(contactDto, ContactEntity.class);
 
@@ -92,6 +98,39 @@ public class ContactDataService {
         contactEntity.setContactBindingId(contactBindingId);
 
         contactEntity = contactRepository.save(contactEntity);
+        return objectMapper.convertValue(contactEntity, ContactDto.class);
+    }
+
+    public ContactDto addContact(String currentPhoneNumber, String contactPhoneNumber) {
+        ContactEntity contactEntity = new ContactEntity();
+
+        UserEntity currentUser = userRepository.findByDialCodeAndPhoneNumber(currentPhoneNumber);
+        contactEntity.setUser(currentUser);
+
+        UserEntity contactUser = userRepository.findByDialCodeAndPhoneNumber(contactPhoneNumber);
+
+        if (contactUser == null) {
+            throw new RuntimeException("User added via QR code doesn't exist");
+        }
+
+        contactEntity.setContactUser(contactUser);
+        contactEntity.setContactName(contactUser.getFirstName());
+        contactEntity.setContactPhoneNumber(contactUser.getFullPhoneNumber());
+        contactEntity.setContactUserExists(true);
+
+        long contactBindingId = UniqueUtil.nextUniqueLong();
+
+        ContactEntity inverseContactEntity = contactRepository.findByUserIdAndContactUserId(
+                contactUser.getId(), currentUser.getId());
+
+        if (inverseContactEntity != null) {
+            contactBindingId = inverseContactEntity.getContactBindingId();
+        }
+
+        contactEntity.setContactBindingId(contactBindingId);
+
+        contactEntity = contactRepository.save(contactEntity);
+
         return objectMapper.convertValue(contactEntity, ContactDto.class);
     }
 
@@ -140,6 +179,12 @@ public class ContactDataService {
     public void setFavouriteStatus(Long contactId, Boolean isFavourite) {
         log.info("Updating {} favourites status to {}", contactId, isFavourite);
         contactRepository.updateFavouriteStatus(contactId, isFavourite);
+    }
+
+    @Transactional
+    public void updateContactName(Long contactId, String contactName) {
+        log.info("Updating {} contact name to {}", contactId, contactName);
+        contactRepository.updateContactName(contactId, contactName);
     }
 }
 

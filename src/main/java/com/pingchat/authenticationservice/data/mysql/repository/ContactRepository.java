@@ -1,6 +1,7 @@
 package com.pingchat.authenticationservice.data.mysql.repository;
 
 import com.pingchat.authenticationservice.data.mysql.entity.ContactEntity;
+import com.pingchat.authenticationservice.model.dto.ContactDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,6 +29,8 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
 
     ContactEntity findByUserIdAndContactUserId(Long userId, Long contactUserId);
 
+    ContactEntity findByUserPhoneNumberAndContactPhoneNumber(String userPhoneNumber, String contactPhoneNumber);
+
     List<ContactEntity> findAllByContactPhoneNumber(String contactPhoneNumber);
 
     @Modifying
@@ -39,4 +42,8 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
     @Modifying
     @Query("UPDATE ContactEntity c set c.isFavorite = :isFavourite where c.id = :contactId")
     void updateFavouriteStatus(Long contactId, Boolean isFavourite);
+
+    @Modifying
+    @Query("UPDATE ContactEntity c set c.contactName = :contactName where c.id = :contactId")
+    void updateContactName(Long contactId, String contactName);
 }

@@ -63,6 +63,21 @@ public class ContactsController {
         return response;
     }
 
+    @PostMapping("qr")
+    public ContactDto addContact(@RequestBody String contactPhoneNumber) {
+        contactPhoneNumber = contactPhoneNumber.replaceAll("\"", "");
+        String currentUserPhoneNumber = SecurityContextUserProvider.currentUserPrincipal();
+
+        ContactDto contactDto = contactDataService.findByUserAndPeer(currentUserPhoneNumber, contactPhoneNumber);
+
+        if (contactDto == null) {
+            contactDto = contactDataService.addContact(currentUserPhoneNumber, contactPhoneNumber);
+        }
+
+        return contactDto;
+    }
+
+
     @GetMapping("{userId}/search/{peerId}")
     public ContactDto findByUserAndPeer(@PathVariable Long userId, @PathVariable Long peerId) {
         return contactDataService.findByUserAndPeer(userId, peerId);
@@ -92,11 +107,13 @@ public class ContactsController {
 
     @PostMapping("{contactId}/favourite")
     public void updateFavouriteStatus(@PathVariable Long contactId, @RequestBody Boolean isFavourite) {
-        try {
-            contactDataService.setFavouriteStatus(contactId, isFavourite);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        contactDataService.setFavouriteStatus(contactId, isFavourite);
+    }
+
+    @PostMapping("{contactId}/name")
+    public void updateContactName(@PathVariable Long contactId, @RequestBody String contactName) {
+        contactName = contactName.replaceAll("\"", "");
+        contactDataService.updateContactName(contactId, contactName);
     }
 }
 

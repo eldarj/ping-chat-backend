@@ -57,6 +57,9 @@ public class MessageDataService {
         List<MessageDto> messageDtos = messageEntitiesPage.stream().map(messageEntity -> {
             MessageDto messageDto = objectMapper.convertValue(messageEntity, MessageDto.class);
 
+            ContactEntity senderContactEntity;
+            ContactEntity receiverContactEntity;
+
             if (messageEntity.getReceiver().getId().equals(userId)) {
                 String receiverPhoneNumber = messageEntity.getReceiver().getCountryCode().getDialCode()
                         + messageEntity.getReceiver().getPhoneNumber();
@@ -66,7 +69,17 @@ public class MessageDataService {
                 int totalUnreadMessages = unreadMessagesInMemoryService.getTotalUnreadMessages(
                         senderPhoneNumber, receiverPhoneNumber);
                 messageDto.setTotalUnreadMessages(totalUnreadMessages);
+
+
+                senderContactEntity = contactRepository.findByUserIdAndContactUserId(messageEntity.getSender().getId(), userId);
+                receiverContactEntity = contactRepository.findByUserIdAndContactUserId(userId, messageEntity.getSender().getId());
+            } else {
+                senderContactEntity = contactRepository.findByUserIdAndContactUserId(userId, messageEntity.getReceiver().getId());
+                receiverContactEntity = contactRepository.findByUserIdAndContactUserId(messageEntity.getReceiver().getId(), userId);
             }
+
+            messageDto.setSenderContactName(receiverContactEntity.getContactName());
+            messageDto.setReceiverContactName(senderContactEntity.getContactName());
 
 
             PresenceEvent receiverPresence = presenceInMemoryService.getPresence(
