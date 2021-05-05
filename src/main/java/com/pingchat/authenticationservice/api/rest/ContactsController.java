@@ -105,9 +105,9 @@ public class ContactsController {
         contactDataService.updateFavouriteStatus(contactId, isFavourite);
     }
 
-    @PostMapping("{contactId}/delete")
-    public void deleteContact(@PathVariable Long contactId, @RequestBody Boolean isDeleted) {
-        contactDataService.updateDeletedStatus(contactId, isDeleted);
+    @DeleteMapping("{contactId}/delete")
+    public void deleteContact(@PathVariable Long contactId) {
+        contactDataService.delete(contactId);
     }
 
     @PostMapping("{contactId}/name")

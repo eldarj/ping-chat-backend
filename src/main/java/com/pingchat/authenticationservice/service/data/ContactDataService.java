@@ -199,8 +199,8 @@ public class ContactDataService {
     }
 
     @Transactional
-    public void updateDeletedStatus(Long contactId, Boolean isDeleted) {
-        contactRepository.updateDeletedStatus(contactId, isDeleted);
+    public void delete(Long contactId) {
+        contactRepository.updateDeletedStatus(contactId, true);
     }
 }
 
