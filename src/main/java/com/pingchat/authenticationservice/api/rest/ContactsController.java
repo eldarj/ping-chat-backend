@@ -115,5 +115,11 @@ public class ContactsController {
         contactName = contactName.replaceAll("\"", "");
         contactDataService.updateContactName(contactId, contactName);
     }
+
+    @PostMapping("{contactId}/background")
+    public void updateBackground(@PathVariable Long contactId, @RequestBody String background) {
+        background = background.replaceAll("\"", "");
+        contactDataService.updateBackground(contactId, background);
+    }
 }
 

@@ -47,4 +47,6 @@ public class ContactEntity {
 
     @NotNull
     private Long addedTimestamp = Instant.now().toEpochMilli();
+
+    private String backgroundImagePath;
 }

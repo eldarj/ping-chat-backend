@@ -186,5 +186,10 @@ public class ContactDataService {
         log.info("Updating {} contact name to {}", contactId, contactName);
         contactRepository.updateContactName(contactId, contactName);
     }
+
+    @Transactional
+    public void updateBackground(Long contactId, String background) {
+        contactRepository.updateBackground(contactId, background);
+    }
 }
 

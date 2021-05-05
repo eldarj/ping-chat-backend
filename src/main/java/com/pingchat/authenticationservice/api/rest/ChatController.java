@@ -35,4 +35,26 @@ public class ChatController {
     public List<PresenceEvent> findPresenceStatuses(@RequestParam List<String> phoneNumbers) {
         return presenceInMemoryService.getPresences(phoneNumbers);
     }
+
+    @GetMapping("backgrounds")
+    public List<String> findBackgrounds() {
+        return List.of(
+                "bg-5.png",
+                "bg-6.png",
+                "bg-7.png",
+                "bg-8.png",
+                "bg-9.png",
+                "bg-11.png",
+                "chat-1.jpg",
+                "chat-2.png",
+                "chat-3.png",
+                "chat-4.jpg",
+                "chat-5.png",
+                "chat-6.png",
+                "chat-7.png",
+                "chat-8.png",
+                "chat-11.png",
+                "chat-12.png"
+        );
+    }
 }

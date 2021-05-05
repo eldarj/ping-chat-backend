@@ -98,6 +98,7 @@ public class MessageDataService {
                 messageDto.setSenderLastOnlineTimestamp(senderPresence.getEventTimestamp());
             }
 
+
             return messageDto;
         }).collect(toList());
 

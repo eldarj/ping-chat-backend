@@ -46,4 +46,8 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
     @Modifying
     @Query("UPDATE ContactEntity c set c.contactName = :contactName where c.id = :contactId")
     void updateContactName(Long contactId, String contactName);
+
+    @Modifying
+    @Query("UPDATE ContactEntity c set c.backgroundImagePath = :backgroundImagePath where c.id = :contactId")
+    void updateBackground(Long contactId, String backgroundImagePath);
 }

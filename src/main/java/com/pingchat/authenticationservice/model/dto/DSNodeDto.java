@@ -1,7 +1,6 @@
 package com.pingchat.authenticationservice.model.dto;
 
 import com.pingchat.authenticationservice.enums.DSNodeType;
-import com.pingchat.authenticationservice.enums.MessageType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
