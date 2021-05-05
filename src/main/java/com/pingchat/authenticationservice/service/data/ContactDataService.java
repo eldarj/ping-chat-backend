@@ -40,8 +40,8 @@ public class ContactDataService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
         Page<ContactEntity> pageOfContactEntities = favourites ?
-                contactRepository.findAllByUserIdAndIsFavoriteOrderByContactNameAsc(userId, favourites, pageable) :
-                contactRepository.findAllByUserIdOrderByContactNameAsc(userId, pageable);
+                contactRepository.findAllByUserIdAndIsFavoriteAndIsDeletedIsFalseOrderByContactNameAsc(userId, favourites, pageable)
+                : contactRepository.findAllByUserIdAndIsDeletedIsFalseOrderByContactNameAsc(userId, pageable);
 
         List<ContactDto> contactDtos = objectMapper.convertValue(pageOfContactEntities.getContent(), List.class);
         return new PagedSearchResult<>(contactDtos, pageOfContactEntities.getTotalElements());
@@ -64,40 +64,37 @@ public class ContactDataService {
                 ContactDto.class);
     }
 
+    @Transactional
     public ContactDto addContact(String currentPhoneNumber, ContactDto contactDto) {
         ContactEntity contactEntity = objectMapper.convertValue(contactDto, ContactEntity.class);
+
+        contactEntity.setContactBindingId(UniqueUtil.nextUniqueLong());
 
         UserEntity currentUser = userRepository.findByDialCodeAndPhoneNumber(currentPhoneNumber);
         contactEntity.setUser(currentUser);
 
         UserEntity contactUser = userRepository.findByDialCodeAndPhoneNumber(contactDto.getContactPhoneNumber());
-        boolean contactUserExists = contactUser != null;
-
         contactEntity.setContactUser(contactUser);
-        contactEntity.setContactUserExists(contactUserExists);
 
-        long contactBindingId = UniqueUtil.nextUniqueLong();
-        if (contactUserExists) {
-            ContactEntity inverseContactEntity = contactRepository.findByUserIdAndContactUserId(
-                    contactUser.getId(), currentUser.getId());
+        if (contactUser != null) {
+            contactEntity.setContactUserExists(true);
+            ContactEntity existingContactEntity = contactRepository.findByUserIdAndContactUserId(
+                    currentUser.getId(), contactUser.getId());
 
-            if (inverseContactEntity != null) {
-                contactBindingId = inverseContactEntity.getContactBindingId();
+            if (existingContactEntity != null) {
+                contactEntity = existingContactEntity;
+                contactEntity.setContactName(contactDto.getContactName());
+                contactEntity.setDeleted(false);
             } else {
-                // TODO: Clean this
-                inverseContactEntity = new ContactEntity();
-                inverseContactEntity.setContactUser(currentUser);
-                inverseContactEntity.setContactPhoneNumber(currentUser.getFullPhoneNumber());
-                inverseContactEntity.setContactName(currentUser.getFirstName());
-                inverseContactEntity.setContactBindingId(contactBindingId);
-                inverseContactEntity.setContactUserExists(true);
-                inverseContactEntity.setUser(contactUser);
+                ContactEntity inverseContactEntity = contactRepository.findByUserIdAndContactUserId(contactUser.getId(), currentUser.getId());
+                if (inverseContactEntity != null) {
+                    contactEntity.setContactBindingId(inverseContactEntity.getContactBindingId());
+                }
             }
         }
 
-        contactEntity.setContactBindingId(contactBindingId);
-
         contactEntity = contactRepository.save(contactEntity);
+
         return objectMapper.convertValue(contactEntity, ContactDto.class);
     }
 
@@ -113,21 +110,30 @@ public class ContactDataService {
             throw new RuntimeException("User added via QR code doesn't exist");
         }
 
-        contactEntity.setContactUser(contactUser);
-        contactEntity.setContactName(contactUser.getFirstName());
-        contactEntity.setContactPhoneNumber(contactUser.getFullPhoneNumber());
-        contactEntity.setContactUserExists(true);
+        ContactEntity existingContactEntity = contactRepository.findByUserIdAndContactUserId(
+                currentUser.getId(), contactUser.getId());
 
-        long contactBindingId = UniqueUtil.nextUniqueLong();
+        if (existingContactEntity != null) {
+            contactEntity = existingContactEntity;
+            contactEntity.setDeleted(false);
 
-        ContactEntity inverseContactEntity = contactRepository.findByUserIdAndContactUserId(
-                contactUser.getId(), currentUser.getId());
+        } else {
+            contactEntity.setContactUser(contactUser);
+            contactEntity.setContactName(contactUser.getFirstName());
+            contactEntity.setContactPhoneNumber(contactUser.getFullPhoneNumber());
+            contactEntity.setContactUserExists(true);
 
-        if (inverseContactEntity != null) {
-            contactBindingId = inverseContactEntity.getContactBindingId();
+            long contactBindingId = UniqueUtil.nextUniqueLong();
+
+            ContactEntity inverseContactEntity = contactRepository.findByUserIdAndContactUserId(
+                    contactUser.getId(), currentUser.getId());
+
+            if (inverseContactEntity != null) {
+                contactBindingId = inverseContactEntity.getContactBindingId();
+            }
+
+            contactEntity.setContactBindingId(contactBindingId);
         }
-
-        contactEntity.setContactBindingId(contactBindingId);
 
         contactEntity = contactRepository.save(contactEntity);
 
@@ -176,7 +182,7 @@ public class ContactDataService {
     }
 
     @Transactional
-    public void setFavouriteStatus(Long contactId, Boolean isFavourite) {
+    public void updateFavouriteStatus(Long contactId, Boolean isFavourite) {
         log.info("Updating {} favourites status to {}", contactId, isFavourite);
         contactRepository.updateFavouriteStatus(contactId, isFavourite);
     }
@@ -190,6 +196,11 @@ public class ContactDataService {
     @Transactional
     public void updateBackground(Long contactId, String background) {
         contactRepository.updateBackground(contactId, background);
+    }
+
+    @Transactional
+    public void updateDeletedStatus(Long contactId, Boolean isDeleted) {
+        contactRepository.updateDeletedStatus(contactId, isDeleted);
     }
 }
 

@@ -14,9 +14,9 @@ import java.util.List;
 
 @Repository
 public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
-    Page<ContactEntity> findAllByUserIdOrderByContactNameAsc(Long userId, Pageable pageable);
+    Page<ContactEntity> findAllByUserIdAndIsDeletedIsFalseOrderByContactNameAsc(Long userId, Pageable pageable);
 
-    Page<ContactEntity> findAllByUserIdAndIsFavoriteOrderByContactNameAsc(Long userId,
+    Page<ContactEntity> findAllByUserIdAndIsFavoriteAndIsDeletedIsFalseOrderByContactNameAsc(Long userId,
                                                                           boolean favourites,
                                                                           Pageable pageable);
 
@@ -50,4 +50,8 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
     @Modifying
     @Query("UPDATE ContactEntity c set c.backgroundImagePath = :backgroundImagePath where c.id = :contactId")
     void updateBackground(Long contactId, String backgroundImagePath);
+
+    @Modifying
+    @Query("UPDATE ContactEntity  c set c.isDeleted = :isDeleted where c.id = :contactId")
+    void updateDeletedStatus(Long contactId, Boolean isDeleted);
 }

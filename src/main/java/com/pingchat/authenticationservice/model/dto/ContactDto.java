@@ -31,4 +31,6 @@ public class ContactDto implements Serializable {
     private Long addedTimestamp = Instant.now().toEpochMilli();
 
     private String backgroundImagePath;
+
+    private boolean isDeleted = false;
 }

@@ -5,7 +5,6 @@ import com.pingchat.authenticationservice.data.mysql.entity.ContactEntity;
 import com.pingchat.authenticationservice.data.mysql.entity.MessageEntity;
 import com.pingchat.authenticationservice.data.mysql.repository.ContactRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.MessageRepository;
-import com.pingchat.authenticationservice.data.mysql.repository.UserRepository;
 import com.pingchat.authenticationservice.model.dto.MessageDto;
 import com.pingchat.authenticationservice.model.event.PresenceEvent;
 import com.pingchat.authenticationservice.service.memory.PresenceInMemoryService;
@@ -114,7 +113,7 @@ public class MessageDataService {
                 messageEntitiesPage.getTotalElements());
 
         ContactEntity contactEntity = contactRepository.findByUserIdAndContactUserId(userId, contactUserId);
-        boolean isContactAdded = contactEntity != null;
+        boolean isContactAdded = contactEntity != null && !contactEntity.isDeleted();
 
         pagedSearchResult.setAdditionalData(Map.of("isContactAdded", isContactAdded));
 

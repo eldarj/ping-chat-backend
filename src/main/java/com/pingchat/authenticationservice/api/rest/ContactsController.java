@@ -88,11 +88,6 @@ public class ContactsController {
         return contactDataService.addContacts(SecurityContextUserProvider.currentUserPrincipal(), contacts);
     }
 
-//    @DeleteMapping("{contactId}/delete")
-//    public void deleteContact(@PathVariable Long contactId) {
-//        contactDataService.delete(contactId);
-//    }
-
     // TODO Include app download link
     @PostMapping("invite")
     public void inviteContact(@RequestBody String phoneNumber) throws IOException, InterruptedException {
@@ -107,7 +102,12 @@ public class ContactsController {
 
     @PostMapping("{contactId}/favourite")
     public void updateFavouriteStatus(@PathVariable Long contactId, @RequestBody Boolean isFavourite) {
-        contactDataService.setFavouriteStatus(contactId, isFavourite);
+        contactDataService.updateFavouriteStatus(contactId, isFavourite);
+    }
+
+    @PostMapping("{contactId}/delete")
+    public void deleteContact(@PathVariable Long contactId, @RequestBody Boolean isDeleted) {
+        contactDataService.updateDeletedStatus(contactId, isDeleted);
     }
 
     @PostMapping("{contactId}/name")
