@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -51,7 +52,7 @@ public class MessageDto implements Serializable {
 
     private Long fileSizeBytes;
 
-    private boolean isDeleted;
+    private boolean isDeleted; //TODO: Deprecate - remove (use deletedFor)
 
     private MessageType messageType = MessageType.TEXT_MESSAGE;
 
@@ -60,4 +61,12 @@ public class MessageDto implements Serializable {
     private String recordingDuration;
 
     private Long nodeId;
+
+    private String deletedForUserIds = "";
+
+    private boolean isPinned;
+
+    private Long pinnedTimestamp;
+
+    private boolean isEdited;
 }

@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -52,6 +53,23 @@ public class MessagesController {
         return userMessagesPage;
     }
 
+    @GetMapping("pinned")
+    public List<MessageDto> findPinnedMessagesByUsers(@RequestParam Long userId,
+                                                      @RequestParam Long contactUserId) {
+        return messageDataService.findPinnedMessagesByUsers(userId, contactUserId);
+    }
+
+    @PostMapping("{messageId}/pin")
+    public void updatePinStatus(@PathVariable Long messageId, @RequestBody Boolean isPinned) {
+        messageDataService.updatePinnedStatus(messageId, isPinned);
+    }
+
+    @PostMapping("{messageId}")
+    public void updateMessage(@PathVariable Long messageId, @RequestBody String text) {
+        text = text.replaceAll("\"", "");
+        messageDataService.update(messageId, text);
+    }
+
     @DeleteMapping("{messageId}")
     public void deleteById(@PathVariable Long messageId) {
         MessageDto messageDto = messageDataService.findById(messageId);
@@ -72,6 +90,12 @@ public class MessagesController {
                 dataSpaceDataService.setReceiverDeletedById(nodeId);
             }
         }
+    }
+
+    @DeleteMapping
+    public void deleteByContact(@RequestParam Long contactBindingId,
+                                @RequestParam Long userId) {
+        messageDataService.delete(contactBindingId, userId);
     }
 }
 

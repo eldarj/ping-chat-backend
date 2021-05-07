@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pingchat.authenticationservice.data.mysql.entity.ContactEntity;
 import com.pingchat.authenticationservice.data.mysql.entity.UserEntity;
 import com.pingchat.authenticationservice.data.mysql.repository.ContactRepository;
+import com.pingchat.authenticationservice.data.mysql.repository.MessageRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.UserRepository;
 import com.pingchat.authenticationservice.model.dto.ContactDto;
 import com.pingchat.authenticationservice.util.UniqueUtil;
@@ -25,13 +26,16 @@ import java.util.stream.Collectors;
 public class ContactDataService {
     private final ContactRepository contactRepository;
     private final UserRepository userRepository;
+    private final MessageRepository messageRepository;
     private final ObjectMapper objectMapper;
 
     public ContactDataService(ContactRepository contactRepository,
                               UserRepository userRepository,
+                              MessageRepository messageRepository,
                               ObjectMapper objectMapper) {
         this.contactRepository = contactRepository;
         this.userRepository = userRepository;
+        this.messageRepository = messageRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -199,8 +203,8 @@ public class ContactDataService {
     }
 
     @Transactional
-    public void delete(Long contactId) {
+    public void delete(Long contactId, Long contactBindingId, Long userId) {
+        messageRepository.deleteByContactBindingId(contactBindingId, userId);
         contactRepository.updateDeletedStatus(contactId, true);
     }
 }
-

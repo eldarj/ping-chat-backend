@@ -1,5 +1,6 @@
 package com.pingchat.authenticationservice.service.data;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pingchat.authenticationservice.data.mysql.entity.ContactEntity;
 import com.pingchat.authenticationservice.data.mysql.entity.MessageEntity;
@@ -16,8 +17,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -120,6 +123,12 @@ public class MessageDataService {
         return pagedSearchResult;
     }
 
+    public List<MessageDto> findPinnedMessagesByUsers(Long userId, Long contactUserId) {
+        List<MessageEntity> messageEntities = messageRepository.findPinnedMessagesByUsers(userId, contactUserId);
+
+        return objectMapper.convertValue(messageEntities, new TypeReference<>() {});
+    }
+
     public MessageDto save(MessageDto messageDto) {
         MessageEntity messageEntity = messageRepository.save(objectMapper.convertValue(messageDto,
                 MessageEntity.class));
@@ -141,6 +150,37 @@ public class MessageDataService {
     @Transactional
     public void setDeleted(long messageId) {
         messageRepository.setToDeleted(messageId);
+    }
+
+    @Transactional
+    public void delete(Long contactBindingId, Long userId) {
+        messageRepository.deleteByContactBindingId(contactBindingId, userId);
+    }
+
+    // TODO: Remove unused?
+    @Transactional
+    public void updatePinnedStatus(Long messageId, Boolean isPinned) {
+        Optional<MessageEntity> optionalMessageEntity = messageRepository.findById(messageId);
+
+        if (optionalMessageEntity.isPresent()) {
+            MessageEntity messageEntity = optionalMessageEntity.get();
+            messageEntity.setPinned(isPinned);
+            messageEntity.setPinnedTimestamp(Instant.now().toEpochMilli());
+        }
+    }
+
+    // TODO: Push edit-change to receiver
+    @Transactional
+    public void update(Long messageId, String text) {
+        Optional<MessageEntity> optionalMessageEntity = messageRepository.findById(messageId);
+
+        if (optionalMessageEntity.isPresent()) {
+            MessageEntity messageEntity = optionalMessageEntity.get();
+            messageEntity.setText(text);
+            messageEntity.setEdited(true);
+
+            messageRepository.save(messageEntity);
+        }
     }
 
 

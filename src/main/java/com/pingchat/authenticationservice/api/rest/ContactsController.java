@@ -106,8 +106,10 @@ public class ContactsController {
     }
 
     @DeleteMapping("{contactId}/delete")
-    public void deleteContact(@PathVariable Long contactId) {
-        contactDataService.delete(contactId);
+    public void deleteContact(@PathVariable Long contactId,
+                              @RequestParam Long contactBindingId,
+                              @RequestParam Long userId) {
+        contactDataService.delete(contactId, contactBindingId, userId);
     }
 
     @PostMapping("{contactId}/name")

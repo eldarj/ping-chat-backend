@@ -13,7 +13,11 @@ import java.util.List;
 public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     @Query(value = "SELECT m.* FROM (" +
             "SELECT max(sent_timestamp) AS sent_timestamp FROM messages " +
-            "WHERE receiver_user_id = ?1 OR sender_user_id = ?1 GROUP BY contact_binding_id" +
+            "WHERE deleted_for_user_ids NOT LIKE CONCAT('%:', ?1, ':%')" +
+            "AND (" +
+            "receiver_user_id = ?1 OR sender_user_id = ?1" +
+            ") " +
+            "GROUP BY contact_binding_id" +
             ") t INNER JOIN messages m ON m.sent_timestamp = t.sent_timestamp " +
             "ORDER BY m.sent_timestamp DESC " +
             "LIMIT ?2 OFFSET ?3",
@@ -25,9 +29,20 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 
     // TODO change this to a single hash value, equal across both contact entities
     @Query("SELECT m FROM MessageEntity  m WHERE " +
+            "m.deletedForUserIds NOT LIKE CONCAT('%:', :userId, ':%') AND (" +
             "(m.receiver.id = :userId AND m.sender.id = :anotherUserId) OR " +
-            "(m.receiver.id = :anotherUserId AND m.sender.id = :userId)")
+            "(m.receiver.id = :anotherUserId AND m.sender.id = :userId)" +
+            ")")
     Page<MessageEntity> findByUsers(Long userId, Long anotherUserId, Pageable pageable);
+
+    @Query("SELECT m FROM MessageEntity  m WHERE " +
+            "m.deletedForUserIds NOT LIKE CONCAT('%:', :userId, ':%') AND " +
+            "m.isPinned = true AND " +
+            "(" +
+            "(m.receiver.id = :userId AND m.sender.id = :contactUserId) OR " +
+            "(m.receiver.id = :contactUserId AND m.sender.id = :userId)" +
+            ") ORDER BY m.sentTimestamp DESC")
+    List<MessageEntity> findPinnedMessagesByUsers(Long userId, Long contactUserId);
 
     @Modifying
     @Query("UPDATE MessageEntity m SET m.seen = true WHERE m.id = :messageId")
@@ -43,6 +58,17 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     void setToDeleted(long messageId);
 
     void deleteByNodeId(Long nodeId);
+
+    @Modifying
+    @Query("UPDATE MessageEntity m " +
+            "SET m.deletedForUserIds = CONCAT(m.deletedForUserIds, ':', :userId, ':') " +
+            "WHERE m.contactBindingId = :contactBindingId")
+    void deleteByContactBindingId(Long contactBindingId, Long userId);
+
+//    @Modifying
+//    @Query("UPDATE MessageEntity m set m.isPinned = :isPinned where m.id = :messageId")
+//    void updatePinnedStatus(Long messageId, Boolean isPinned);
+
 
 //    Page<MessageEntity> findAllBySenderIdAndReceiverId(long senderId, long receiverId, Pageable pageable);
 //

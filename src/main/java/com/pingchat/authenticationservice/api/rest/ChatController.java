@@ -38,7 +38,8 @@ public class ChatController {
 
     @GetMapping("backgrounds")
     public List<String> findBackgrounds() {
-        return List.of(
+
+    return List.of(
                 "bg-5.png",
                 "bg-6.png",
                 "bg-7.png",

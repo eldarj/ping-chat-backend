@@ -23,6 +23,7 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
     @Query(value = "SELECT c.* FROM contacts c " +
             "WHERE c.user_id = ?1 " +
             "AND CONCAT(c.contact_name, c.contact_phone_number) LIKE %?2% " +
+            "AND c.is_deleted = false " +
             "ORDER BY c.contact_name ASC",
             nativeQuery = true)
     List<ContactEntity> findAllByNameOrPhonenumber(Long userId, String query);

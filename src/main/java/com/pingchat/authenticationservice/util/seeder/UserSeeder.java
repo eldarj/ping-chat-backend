@@ -201,6 +201,7 @@ public class UserSeeder implements CommandLineRunner {
             messageEntity2.setId(0);
             messageEntity2.setText("Ok \uD83D\uDE04\uD83D\uDE04");
             messageEntity2.setSentTimestamp(Instant.now().toEpochMilli());
+            messageEntity2.setPinned(true);
             messageRepository.save(messageEntity2);
 
 
