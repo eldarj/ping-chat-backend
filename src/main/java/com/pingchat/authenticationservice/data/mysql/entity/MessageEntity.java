@@ -69,4 +69,8 @@ public class MessageEntity {
     private Long pinnedTimestamp;
 
     private boolean isEdited;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "reply_message_id")
+    private ReplyEntity replyMessage;
 }

@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    private static final String STATIC_FILES_BASE_URL = "http://192.168.0.13:8089/files/profiles/";
+    private static final String STATIC_FILES_BASE_URL = "http://192.168.1.25:8089/files/profiles/";
 
     private final UserDataService userDataService;
     private final StaticFileStorageService staticFileStorageService;

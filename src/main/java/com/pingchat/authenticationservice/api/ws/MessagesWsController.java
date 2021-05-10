@@ -64,6 +64,16 @@ public class MessagesWsController {
         firebaseService.sendMessageNotification(messageDto);
     }
 
+    @MessageMapping("/messages/edit")
+    public void editMessage(@Payload MessageDto messageDto, Principal senderPrincipal) {
+        messageDataService.update(messageDto.getId(), messageDto.getText());
+
+        String receiverPhoneNumber = messageDto.getReceiver().getFullPhoneNumber();
+
+        simpMessagingTemplate.convertAndSendToUser(receiverPhoneNumber, "/messages/edited",
+                messageDto);
+    }
+
     @MessageMapping("/messages/received")
     public void messageReceived(@Payload MessageStatusChangeDto messageStatusChangeDto, Principal receiverPrincipal) {
         long messageId = messageStatusChangeDto.getId();

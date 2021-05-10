@@ -64,6 +64,7 @@ public class MessagesController {
         messageDataService.updatePinnedStatus(messageId, isPinned);
     }
 
+    // TODO: Remove
     @PostMapping("{messageId}")
     public void updateMessage(@PathVariable Long messageId, @RequestBody String text) {
         text = text.replaceAll("\"", "");
