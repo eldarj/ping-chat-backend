@@ -1,12 +1,13 @@
 package com.pingchat.authenticationservice.service.data;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pingchat.authenticationservice.data.mysql.entity.UserEntity;
+import com.pingchat.authenticationservice.data.mysql.entity.UserSettingsEntity;
 import com.pingchat.authenticationservice.data.mysql.repository.UserRepository;
-import com.pingchat.authenticationservice.model.dto.FsUser;
+import com.pingchat.authenticationservice.data.mysql.repository.UserSettingsRepository;
 import com.pingchat.authenticationservice.model.dto.UserDto;
+import com.pingchat.authenticationservice.model.dto.UserSettingsDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +20,14 @@ import java.util.stream.Collectors;
 @Service
 public class UserDataService {
     private final UserRepository userRepository;
+    private final UserSettingsRepository userSettingsRepository;
     private final ObjectMapper objectMapper;
 
-    public UserDataService(UserRepository userRepository, ObjectMapper objectMapper) {
+    public UserDataService(UserRepository userRepository,
+                           UserSettingsRepository userSettingsRepository,
+                           ObjectMapper objectMapper) {
         this.userRepository = userRepository;
+        this.userSettingsRepository = userSettingsRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -35,11 +40,13 @@ public class UserDataService {
     public List<UserDto> findAll() throws IOException {
         List<UserEntity> all = userRepository.findAll();
         return objectMapper.readValue(objectMapper.writeValueAsBytes(all),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
     }
 
     public UserDto findById(long id) {
-        return objectMapper.convertValue(userRepository.findById(id), UserDto.class);
+        UserEntity user = userRepository.findById(id);
+        return objectMapper.convertValue(user, UserDto.class);
     }
 
     public UserDto updateUser(UserDto userDto) {
@@ -55,5 +62,11 @@ public class UserDataService {
     @Transactional
     public int updateProfileImage(long userId, String profileImageName) {
         return userRepository.updateProfileImage(userId, profileImageName);
+    }
+
+    @Transactional
+    public UserSettingsDto updateUserSettings(UserSettingsDto userSettingsDto) {
+        UserSettingsEntity userSettings = objectMapper.convertValue(userSettingsDto, UserSettingsEntity.class);
+        return objectMapper.convertValue(userSettingsRepository.save(userSettings), UserSettingsDto.class);
     }
 }

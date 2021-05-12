@@ -35,4 +35,4 @@ jwt:
   issuer: PingPlatform
 
 freeswitch:
-  host: 192.168.1.25
+  host: 192.168.1.4

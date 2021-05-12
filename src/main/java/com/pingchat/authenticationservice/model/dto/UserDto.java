@@ -23,6 +23,8 @@ public class UserDto implements Serializable {
 
     private boolean displayMyFullName = true;
 
+    private UserSettingsDto userSettings;
+
     private Long joinedTimestamp = Instant.now().toEpochMilli();
 
     private String profileImagePath;

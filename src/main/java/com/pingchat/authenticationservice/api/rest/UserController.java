@@ -3,6 +3,7 @@ package com.pingchat.authenticationservice.api.rest;
 import com.drew.imaging.ImageProcessingException;
 import com.pingchat.authenticationservice.auth.util.SecurityContextUserProvider;
 import com.pingchat.authenticationservice.model.dto.UserDto;
+import com.pingchat.authenticationservice.model.dto.UserSettingsDto;
 import com.pingchat.authenticationservice.service.FirebaseService;
 import com.pingchat.authenticationservice.service.data.UserDataService;
 import com.pingchat.authenticationservice.service.files.StaticFileStorageService;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    private static final String STATIC_FILES_BASE_URL = "http://192.168.1.25:8089/files/profiles/";
+    private static final String STATIC_FILES_BASE_URL = "http://192.168.1.4:8089/files/profiles/";
 
     private final UserDataService userDataService;
     private final StaticFileStorageService staticFileStorageService;
@@ -43,13 +44,18 @@ public class UserController {
     }
 
     @GetMapping("{userId}")
-    public UserDto findDriver(@PathVariable long userId) {
+    public UserDto findUser(@PathVariable long userId) {
         return userDataService.findById(userId);
     }
 
     @PostMapping
     public UserDto updateUser(@RequestBody UserDto userDto) {
         return userDataService.updateUser(userDto);
+    }
+
+    @PostMapping("{userId}/settings")
+    public UserSettingsDto updateUserSettings(@PathVariable long userId, @RequestBody UserSettingsDto userSettings) {
+        return userDataService.updateUserSettings(userSettings);
     }
 
     @PostMapping("/{userId}/name")

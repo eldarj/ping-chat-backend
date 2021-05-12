@@ -24,7 +24,6 @@ public class UserEntity {
     @NotBlank
     @Column(name = "phone_number")
     private String phoneNumber;
-
     private String firstName;
     private String lastName;
 
@@ -41,6 +40,10 @@ public class UserEntity {
     @JsonIgnore
     @OneToMany(mappedBy = "user")
     private Set<UserTokenEntity> tokens;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_settings_id", referencedColumnName = "id")
+    private UserSettingsEntity userSettings = new UserSettingsEntity();
 
     @NotNull
     private Long joinedTimestamp = Instant.now().toEpochMilli();
