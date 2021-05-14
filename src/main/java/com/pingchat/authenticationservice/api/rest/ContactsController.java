@@ -113,9 +113,11 @@ public class ContactsController {
     }
 
     @PostMapping("{contactId}/name")
-    public void updateContactName(@PathVariable Long contactId, @RequestBody String contactName) {
+    public void updateContactName(@PathVariable Long contactId,
+                                  @RequestBody String contactName,
+                                  @RequestParam Long contactBindingId) {
         contactName = contactName.replaceAll("\"", "");
-        contactDataService.updateContactName(contactId, contactName);
+        contactDataService.updateContactName(contactId, contactName, contactBindingId);
     }
 
     @PostMapping("{contactId}/background")

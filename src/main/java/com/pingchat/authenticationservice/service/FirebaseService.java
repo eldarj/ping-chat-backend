@@ -68,7 +68,9 @@ public class FirebaseService {
                     body = "Recording";
                 } else if (messageType.equals(MessageType.STICKER)) {
                     body = "Sticker";
-                } else if (messageType.equals(MessageType.STICKER)) {
+                } else if (messageType.equals(MessageType.GIF)) {
+                    body = "GIF";
+                } else if (messageType.equals(MessageType.MAP_LOCATION)) {
                     body = "Location";
                 } else {
                     body = "Media";

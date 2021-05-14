@@ -2,7 +2,9 @@ package com.pingchat.authenticationservice.service.data;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pingchat.authenticationservice.auth.util.SecurityContextUserProvider;
 import com.pingchat.authenticationservice.data.mysql.entity.ContactEntity;
+import com.pingchat.authenticationservice.data.mysql.entity.MessageEntity;
 import com.pingchat.authenticationservice.data.mysql.entity.UserEntity;
 import com.pingchat.authenticationservice.data.mysql.repository.ContactRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.MessageRepository;
@@ -14,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -192,8 +195,23 @@ public class ContactDataService {
     }
 
     @Transactional
-    public void updateContactName(Long contactId, String contactName) {
+    public void updateContactName(Long contactId, String contactName, Long contactBindingId) {
         log.info("Updating {} contact name to {}", contactId, contactName);
+
+        MessageEntity messageEntity = messageRepository.findSingleByContactBindingId(contactBindingId);
+
+        if (messageEntity != null) {
+            if (messageEntity.getReceiver().getFullPhoneNumber().equals(SecurityContextUserProvider.currentUserPrincipal())) {
+                messageEntity.setSenderContactName(contactName);
+            } else {
+                messageEntity.setReceiverContactName(contactName);
+            }
+
+            log.info("Updating last message sender/receiver contact name");
+            messageRepository.save(messageEntity);
+        }
+
+
         contactRepository.updateContactName(contactId, contactName);
     }
 

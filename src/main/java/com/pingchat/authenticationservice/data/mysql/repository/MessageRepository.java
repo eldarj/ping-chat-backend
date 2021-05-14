@@ -27,13 +27,20 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 //    @Query("SELECT m FROM MessageEntity m WHERE m.receiver.id = :userId OR m.sender.id = :userId")
 //    Page<MessageEntity> findDistinctByUser(Long userId, Pageable pageable);
 
-    // TODO change this to a single hash value, equal across both contact entities
+    // TODO change this to a single hash value, equal across both contact entities (see: contactBindingId)
     @Query("SELECT m FROM MessageEntity  m WHERE " +
             "m.deletedForUserIds NOT LIKE CONCAT('%:', :userId, ':%') AND (" +
             "(m.receiver.id = :userId AND m.sender.id = :anotherUserId) OR " +
             "(m.receiver.id = :anotherUserId AND m.sender.id = :userId)" +
             ")")
     Page<MessageEntity> findByUsers(Long userId, Long anotherUserId, Pageable pageable);
+
+    @Query(value = "SELECT m.* FROM messages m " +
+            "WHERE m.contact_binding_id = ?1 " +
+            "ORDER BY m.sent_timestamp DESC " +
+            "LIMIT 1",
+            nativeQuery = true)
+    MessageEntity findSingleByContactBindingId(long contactBindingId);
 
     @Query("SELECT m FROM MessageEntity  m WHERE " +
             "m.deletedForUserIds NOT LIKE CONCAT('%:', :userId, ':%') AND " +
