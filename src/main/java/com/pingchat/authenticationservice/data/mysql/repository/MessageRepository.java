@@ -35,6 +35,11 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             ")")
     Page<MessageEntity> findByUsers(Long userId, Long anotherUserId, Pageable pageable);
 
+    @Query("SELECT m FROM MessageEntity  m WHERE " +
+            "m.contactBindingId = :contactBindingId AND " +
+            "m.deletedForUserIds NOT LIKE CONCAT('%:', :userId, ':%')")
+    Page<MessageEntity> findByContactBindingId(long userId, long contactBindingId, Pageable pageable);
+
     @Query(value = "SELECT m.* FROM messages m " +
             "WHERE m.contact_binding_id = ?1 " +
             "ORDER BY m.sent_timestamp DESC " +

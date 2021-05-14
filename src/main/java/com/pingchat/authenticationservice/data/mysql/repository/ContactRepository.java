@@ -30,6 +30,8 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
 
     ContactEntity findByUserIdAndContactUserId(Long userId, Long contactUserId);
 
+    ContactEntity findByUserIdAndContactBindingId(Long userId, long contactUserId);
+
     ContactEntity findByUserPhoneNumberAndContactPhoneNumber(String userPhoneNumber, String contactPhoneNumber);
 
     List<ContactEntity> findAllByContactPhoneNumber(String contactPhoneNumber);

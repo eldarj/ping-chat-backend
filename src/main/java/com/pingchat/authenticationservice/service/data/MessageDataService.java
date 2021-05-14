@@ -12,12 +12,15 @@ import com.pingchat.authenticationservice.service.memory.PresenceInMemoryService
 import com.pingchat.authenticationservice.service.memory.UnreadMessagesInMemoryService;
 import com.pingchat.authenticationservice.util.pagination.PagedSearchResult;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.bridge.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,11 +59,10 @@ public class MessageDataService {
         List<MessageEntity> messageEntitiesPage = messageRepository.findDistinctByUser(userId,
                 pageSize, pageNumber * pageSize);
 
-        List<MessageDto> messageDtos = messageEntitiesPage.stream().map(messageEntity -> {
-            MessageDto messageDto = objectMapper.convertValue(messageEntity, MessageDto.class);
+        Map<Object, Object> messagesPerContact = new HashMap<>();
 
-//            ContactEntity senderContactEntity;
-//            ContactEntity receiverContactEntity;
+        List<MessageDto> messages = messageEntitiesPage.stream().map(messageEntity -> {
+            MessageDto messageDto = objectMapper.convertValue(messageEntity, MessageDto.class);
 
             if (messageEntity.getReceiver().getId().equals(userId)) {
                 String receiverPhoneNumber = messageEntity.getReceiver().getCountryCode().getDialCode()
@@ -71,19 +73,7 @@ public class MessageDataService {
                 int totalUnreadMessages = unreadMessagesInMemoryService.getTotalUnreadMessages(
                         senderPhoneNumber, receiverPhoneNumber);
                 messageDto.setTotalUnreadMessages(totalUnreadMessages);
-
-
-//                senderContactEntity = contactRepository.findByUserIdAndContactUserId(messageEntity.getSender().getId(), userId);
-//                receiverContactEntity = contactRepository.findByUserIdAndContactUserId(userId, messageEntity.getSender().getId());
             }
-//            else {
-//                senderContactEntity = contactRepository.findByUserIdAndContactUserId(userId, messageEntity.getReceiver().getId());
-//                receiverContactEntity = contactRepository.findByUserIdAndContactUserId(messageEntity.getReceiver().getId(), userId);
-//            }
-
-//            messageDto.setSenderContactName(receiverContactEntity.getContactName());
-//            messageDto.setReceiverContactName(senderContactEntity.getContactName());
-
 
             PresenceEvent receiverPresence = presenceInMemoryService.getPresence(
                     messageDto.getReceiver().getCountryCode().getDialCode() + messageDto.getReceiver().getPhoneNumber());
@@ -101,13 +91,41 @@ public class MessageDataService {
                 messageDto.setSenderLastOnlineTimestamp(senderPresence.getEventTimestamp());
             }
 
+            // Load messages for contact
+            PagedSearchResult<MessageDto> userMessagesPage = findMessagesByContactBindingId(userId, messageDto.getContactBindingId(),
+                    PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "sentTimestamp")));
+
+            messagesPerContact.put(messageDto.getContactBindingId(), userMessagesPage);
 
             return messageDto;
         }).collect(toList());
 
-        return new PagedSearchResult<>(messageDtos, Integer.toUnsignedLong(messageDtos.size()));
+        return new PagedSearchResult<>(
+                messages,
+                Integer.toUnsignedLong(messages.size()),
+                messagesPerContact
+        );
     }
 
+    public PagedSearchResult<MessageDto> findMessagesByContactBindingId(Long userId,
+                                                                        Long contactBindingId,
+                                                                        PageRequest pageRequest) {
+        Page<MessageEntity> messageEntitiesPage = messageRepository.findByContactBindingId(userId, contactBindingId, pageRequest);
+
+        List<MessageDto> messageDtos = objectMapper.convertValue(messageEntitiesPage.getContent(), List.class);
+
+        PagedSearchResult<MessageDto> pagedSearchResult = new PagedSearchResult<>(messageDtos,
+                messageEntitiesPage.getTotalElements());
+
+        ContactEntity contactEntity = contactRepository.findByUserIdAndContactBindingId(userId, contactBindingId);
+        boolean isContactAdded = contactEntity != null && !contactEntity.isDeleted();
+
+        pagedSearchResult.setAdditionalData(Map.of("isContactAdded", isContactAdded));
+
+        return pagedSearchResult;
+    }
+
+    // TODO: Deprecated, remove
     public PagedSearchResult<MessageDto> findMessagesByUsers(Long userId, Long contactUserId, PageRequest pageRequest) {
         Page<MessageEntity> messageEntitiesPage = messageRepository.findByUsers(userId, contactUserId, pageRequest);
 
