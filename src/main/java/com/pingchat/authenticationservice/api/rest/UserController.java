@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    private static final String STATIC_FILES_BASE_URL = "http://192.168.1.4:8089/files/profiles/";
+    private static final String STATIC_FILES_BASE_URL = "http://192.168.0.13:8089/files/profiles/";
 
     private final UserDataService userDataService;
     private final StaticFileStorageService staticFileStorageService;
@@ -70,7 +70,7 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/profile-image")
-    public String handleFileUpload(@PathVariable long userId, @RequestParam("file") MultipartFile file)
+    public String updateProfileImage(@PathVariable long userId, @RequestParam("file") MultipartFile file)
             throws IOException, ImageProcessingException {
         String newFileName = staticFileStorageService.saveProfileImage(file);
 
@@ -84,6 +84,11 @@ public class UserController {
         }
 
         return newProfileImagePath;
+    }
+
+    @DeleteMapping("/{userId}/profile-image")
+    public void removeProfileImage(@PathVariable long userId) {
+        userDataService.updateProfileImage(userId, null);
     }
 
     @PostMapping("/firebase-token")

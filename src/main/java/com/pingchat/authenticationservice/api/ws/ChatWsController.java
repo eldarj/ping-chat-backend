@@ -1,6 +1,7 @@
 package com.pingchat.authenticationservice.api.ws;
 
 import com.pingchat.authenticationservice.model.event.PresenceEvent;
+import com.pingchat.authenticationservice.model.event.TypingEvent;
 import com.pingchat.authenticationservice.service.memory.PresenceInMemoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -10,14 +11,16 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 
+import java.security.Principal;
+
 @Slf4j
 @Controller
-public class PresenceWsController {
+public class ChatWsController {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final PresenceInMemoryService presenceInMemoryService;
 
-    public PresenceWsController(SimpMessagingTemplate simpMessagingTemplate,
-                                PresenceInMemoryService presenceInMemoryService) {
+    public ChatWsController(SimpMessagingTemplate simpMessagingTemplate,
+                            PresenceInMemoryService presenceInMemoryService) {
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.presenceInMemoryService = presenceInMemoryService;
     }
@@ -33,5 +36,15 @@ public class PresenceWsController {
         simpMessagingTemplate.convertAndSend(
                 "/users/" + presenceEvent.getUserPhoneNumber() + "/status",
                 presenceEvent);
+    }
+
+    @MessageMapping("/users/typing")
+    public void sendMessage(@Payload TypingEvent typingEvent, Principal senderPrincipal) {
+        String receiverPhoneNumber = typingEvent.getReceiverPhoneNumber();
+
+        String senderPhoneNumber = senderPrincipal.getName();
+        typingEvent.setSenderPhoneNumber(senderPhoneNumber);
+
+        simpMessagingTemplate.convertAndSendToUser(receiverPhoneNumber, "/users/typing", typingEvent);
     }
 }

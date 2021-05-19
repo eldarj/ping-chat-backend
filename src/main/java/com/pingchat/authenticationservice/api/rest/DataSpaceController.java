@@ -97,7 +97,7 @@ public class DataSpaceController {
 
             try (InputStream inputStream = this.tusFileUploadService.getUploadedBytes(uploadUrl)) {
                 String fileName = uploadInfo.getFileName();
-                String fileUrl = "http://192.168.1.4:8089/files/uploads/" + fileName;
+                String fileUrl = "http://192.168.0.13:8089/files/uploads/" + fileName;
 
                 Path output = Paths.get(staticBasePath + "/uploads").resolve(fileName);
                 Files.copy(inputStream, output, StandardCopyOption.REPLACE_EXISTING);

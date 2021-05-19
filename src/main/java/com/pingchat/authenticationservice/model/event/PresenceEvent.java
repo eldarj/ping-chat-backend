@@ -1,6 +1,5 @@
 package com.pingchat.authenticationservice.model.event;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

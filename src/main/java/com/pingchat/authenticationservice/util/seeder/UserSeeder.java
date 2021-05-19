@@ -207,7 +207,7 @@ public class UserSeeder implements CommandLineRunner {
 
             // Seed sticker
             messageEntity.setId(0);
-            messageEntity.setText("panda3.png");
+            messageEntity.setText("panda/panda3.png");
             messageEntity.setSentTimestamp(Instant.now().toEpochMilli());
             messageEntity.setMessageType(MessageType.STICKER);
             messageEntity.setSeen(false);
