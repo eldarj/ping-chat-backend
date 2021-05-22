@@ -3,7 +3,6 @@ package com.pingchat.authenticationservice.util.seeder;
 import com.pingchat.authenticationservice.data.mysql.entity.*;
 import com.pingchat.authenticationservice.data.mysql.repository.*;
 import com.pingchat.authenticationservice.enums.MessageType;
-import com.pingchat.authenticationservice.model.dto.DSNodeDto;
 import com.pingchat.authenticationservice.service.data.DataSpaceDataService;
 import com.pingchat.authenticationservice.util.UniqueUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -204,6 +203,12 @@ public class UserSeeder implements CommandLineRunner {
             messageEntity2.setPinned(true);
             messageRepository.save(messageEntity2);
 
+            // Seed message pinned neutral message
+            messageEntity.setId(0);
+            messageEntity.setSentTimestamp(Instant.now().toEpochMilli());
+            messageEntity.setMessageType(MessageType.PIN_INFO);
+            messageEntity.setPinned(true);
+            messageRepository.save(messageEntity);
 
             // Seed sticker
             messageEntity.setId(0);

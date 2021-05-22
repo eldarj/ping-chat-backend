@@ -65,17 +65,19 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     @Query("UPDATE MessageEntity m SET m.received = true WHERE m.id = :messageId")
     void setToReceived(long messageId);
 
-    @Modifying
-    @Query("UPDATE MessageEntity m SET m.isDeleted = true WHERE m.id = :messageId")
-    void setToDeleted(long messageId);
-
-    void deleteByNodeId(Long nodeId);
+    void deleteByNodeId(Long nodeId); // TODO: Check if works for peers
 
     @Modifying
     @Query("UPDATE MessageEntity m " +
             "SET m.deletedForUserIds = CONCAT(m.deletedForUserIds, ':', :userId, ':') " +
             "WHERE m.contactBindingId = :contactBindingId")
     void deleteByContactBindingId(Long contactBindingId, Long userId);
+
+    @Modifying
+    @Query("UPDATE MessageEntity m " +
+            "SET m.deletedForUserIds = CONCAT(m.deletedForUserIds, ':', :userId, ':') " +
+            "WHERE m.id = :messageId")
+    void deleteForUser(Long messageId, Long userId);
 
 //    @Modifying
 //    @Query("UPDATE MessageEntity m set m.isPinned = :isPinned where m.id = :messageId")

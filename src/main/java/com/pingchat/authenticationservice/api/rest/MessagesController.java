@@ -71,32 +71,37 @@ public class MessagesController {
         messageDataService.update(messageId, text);
     }
 
-    @DeleteMapping("{messageId}")
-    public void deleteById(@PathVariable Long messageId) {
-        MessageDto messageDto = messageDataService.findById(messageId);
-        messageDataService.setDeleted(messageId);
-        messagesWsController.messageDeleted(messageDto);
+//    @DeleteMapping("{messageId}")
+//    public void deleteById(@PathVariable Long messageId) {
+//        MessageDto messageDto = messageDataService.findById(messageId);
+//        messageDataService.setDeleted(messageId);
+//        messagesWsController.messageDeleted(messageDto);
+//
+//        Long nodeId = messageDto.getNodeId();
+//        if (nodeId != null) {
+//            if (Objects.equals(messageDto.getSender().getFullPhoneNumber(),
+//                    SecurityContextUserProvider.currentUserPrincipal())) {
+//                dataSpaceDataService.setOwnerDeletedById(nodeId);
+//                try {
+//                    staticFileStorageService.delete(messageDto.getFileName());
+//                } catch (IOException e) {
+//                    log.warn("Error deleting file: {}", messageDto.getFilePath());
+//                }
+//            } else {
+//                dataSpaceDataService.setReceiverDeletedById(nodeId);
+//            }
+//        }
+//    }
 
-        Long nodeId = messageDto.getNodeId();
-        if (nodeId != null) {
-            if (Objects.equals(messageDto.getSender().getFullPhoneNumber(),
-                    SecurityContextUserProvider.currentUserPrincipal())) {
-                dataSpaceDataService.setOwnerDeletedById(nodeId);
-                try {
-                    staticFileStorageService.delete(messageDto.getFileName());
-                } catch (IOException e) {
-                    log.warn("Error deleting file: {}", messageDto.getFilePath());
-                }
-            } else {
-                dataSpaceDataService.setReceiverDeletedById(nodeId);
-            }
-        }
+    @DeleteMapping("{messageId}")
+    public void deleteById(@PathVariable Long messageId, @RequestParam Long userId) {
+        messageDataService.deleteForUser(messageId, userId);
     }
 
     @DeleteMapping
     public void deleteByContact(@RequestParam Long contactBindingId,
                                 @RequestParam Long userId) {
-        messageDataService.delete(contactBindingId, userId);
+        messageDataService.deleteAllForUser(contactBindingId, userId);
     }
 }
 

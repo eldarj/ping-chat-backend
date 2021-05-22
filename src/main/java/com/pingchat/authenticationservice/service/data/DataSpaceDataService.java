@@ -125,16 +125,29 @@ public class DataSpaceDataService {
 
         if (dsNodeEntityOptional.isPresent()) {
             DSNodeEntity dsNodeEntity = dsNodeEntityOptional.get();
-            recursiveDeleteNode(dsNodeEntity);
+            recursiveDeleteNode(dsNodeEntity, true);
         }
     }
 
-    private void recursiveDeleteNode(DSNodeEntity dsNodeEntity) {
-        dsNodeRepository.deleteById(dsNodeEntity.getId());
+    @Transactional
+    public void deleteDirectoryContentByNodeId(Long nodeId) {
+        Optional<DSNodeEntity> dsNodeEntityOptional = dsNodeRepository.findById(nodeId);
+
+        if (dsNodeEntityOptional.isPresent()) {
+            DSNodeEntity dsNodeEntity = dsNodeEntityOptional.get();
+            recursiveDeleteNode(dsNodeEntity, false);
+        }
+    }
+
+    private void recursiveDeleteNode(DSNodeEntity dsNodeEntity, boolean deleteSelf) {
+        if (deleteSelf) {
+            dsNodeRepository.deleteById(dsNodeEntity.getId());
+        }
+
         if (dsNodeEntity.getNodeType() == DSNodeType.DIRECTORY) {
             List<DSNodeEntity> childNodes = dsNodeRepository.findAllByParentDirectoryNodeId(dsNodeEntity.getId());
             for (DSNodeEntity child : childNodes) {
-                recursiveDeleteNode(child);
+                recursiveDeleteNode(child, true);
             }
         }
     }

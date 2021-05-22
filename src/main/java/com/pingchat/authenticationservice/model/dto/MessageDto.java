@@ -50,8 +50,6 @@ public class MessageDto implements Serializable {
 
     private Long fileSizeBytes;
 
-    private boolean isDeleted; //TODO: Deprecate - remove (use deletedFor)
-
     private MessageType messageType = MessageType.TEXT_MESSAGE;
 
     private int totalUnreadMessages;

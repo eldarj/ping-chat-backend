@@ -167,12 +167,12 @@ public class MessageDataService {
     }
 
     @Transactional
-    public void setDeleted(long messageId) {
-        messageRepository.setToDeleted(messageId);
+    public void deleteForUser(Long messageId, Long userId) {
+        messageRepository.deleteForUser(messageId, userId);
     }
 
     @Transactional
-    public void delete(Long contactBindingId, Long userId) {
+    public void deleteAllForUser(Long contactBindingId, Long userId) {
         messageRepository.deleteByContactBindingId(contactBindingId, userId);
     }
 
@@ -201,26 +201,4 @@ public class MessageDataService {
             messageRepository.save(messageEntity);
         }
     }
-
-
-//    public Page<MessageDto> findBySenderOrReceiver(String senderPhoneNumber,
-//                                                   String receiverPhoneNumber,
-//                                                   PageRequest pageRequest) {
-//        List<Long> senderOrReceiver = List.of(userRepository.findByDialCodeAndPhoneNumber(senderPhoneNumber).getId(),
-//                userRepository.findByDialCodeAndPhoneNumber(receiverPhoneNumber).getId());
-//
-//        log.info("Get messages by {}", senderOrReceiver);
-//
-//        return messageRepository.findAllBySenderIdInAndReceiverIdIn(senderOrReceiver, senderOrReceiver, pageRequest)
-//                .map(messageEntity -> objectMapper.convertValue(messageEntity, MessageDto.class));
-//    }
-//
-//    public void saveMessage(MessageDto messageDto) {
-//        MessageEntity messageEntity = objectMapper.convertValue(messageDto, MessageEntity.class);
-//        messageEntity.setReceiver(userRepository.findByDialCodeAndPhoneNumber(messageDto.getSendTo())); // TODO avoid
-//        // getting from db
-//        messageEntity.setSender(userRepository.findByDialCodeAndPhoneNumber(messageDto.getSentFrom()));
-//
-//        messageRepository.save(messageEntity);
-//    }
 }
