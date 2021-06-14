@@ -8,6 +8,7 @@ import com.pingchat.authenticationservice.service.FirebaseService;
 import com.pingchat.authenticationservice.service.data.UserDataService;
 import com.pingchat.authenticationservice.service.files.StaticFileStorageService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,7 +23,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    private static final String STATIC_FILES_BASE_URL = "http://192.168.0.13:8089/files/profiles/";
+    @Value("${service.static-ip-base}")
+    private String STATIC_IP_BASE;
 
     private final UserDataService userDataService;
     private final StaticFileStorageService staticFileStorageService;
@@ -74,7 +76,7 @@ public class UserController {
             throws IOException, ImageProcessingException {
         String newFileName = staticFileStorageService.saveProfileImage(file);
 
-        String newProfileImagePath = STATIC_FILES_BASE_URL + newFileName;
+        String newProfileImagePath = STATIC_IP_BASE + "/profiles/" + newFileName;
 
         int updated = userDataService.updateProfileImage(userId, newProfileImagePath);
         if (updated <= 0) {
@@ -93,13 +95,8 @@ public class UserController {
 
     @PostMapping("/firebase-token")
     public void registerFirebaseToken(@RequestBody String firebaseToken) {
-        String currentUserPhoneNumber = SecurityContextUserProvider.currentUserPrincipal();
+        String currentUserPhoneNumber = SecurityContextUserProvider.currentPhoneNumber();
         firebaseToken = firebaseToken.replaceAll("\"", "");
         firebaseService.registerToken(currentUserPhoneNumber, firebaseToken);
-    }
-
-    @PostMapping("/{userId}/logout")
-    public void logout(@PathVariable String userId) {
-        log.info("User {} logged out.", userId);
     }
 }
