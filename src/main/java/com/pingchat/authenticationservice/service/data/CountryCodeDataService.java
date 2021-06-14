@@ -24,7 +24,7 @@ public class CountryCodeDataService {
     }
 
     public CountryCodeDto save(CountryCodeDto countryCodeDto) {
-        log.info("Saving countryCodeDto {}", countryCodeDto);
+        log.info("Saving country code {}", countryCodeDto);
         CountryCodeEntity countryCodeEntity = objectMapper.convertValue(countryCodeDto, CountryCodeEntity.class);
         return objectMapper.convertValue(countryCodeRepository.save(countryCodeEntity), CountryCodeDto.class);
     }
