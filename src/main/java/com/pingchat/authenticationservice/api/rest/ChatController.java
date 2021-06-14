@@ -1,14 +1,18 @@
 package com.pingchat.authenticationservice.api.rest;
 
-
+import com.pingchat.authenticationservice.auth.util.SecurityContextUserProvider;
 import com.pingchat.authenticationservice.model.dto.MessageDto;
 import com.pingchat.authenticationservice.model.event.PresenceEvent;
+import com.pingchat.authenticationservice.service.FirebaseService;
 import com.pingchat.authenticationservice.service.data.MessageDataService;
 import com.pingchat.authenticationservice.service.memory.PresenceInMemoryService;
 import com.pingchat.authenticationservice.util.pagination.PagedSearchResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Slf4j
@@ -17,13 +21,17 @@ import java.util.List;
 public class ChatController {
     private final MessageDataService messageDataService;
     private final PresenceInMemoryService presenceInMemoryService;
+    private final FirebaseService firebaseService;
 
     public ChatController(MessageDataService messageDataService,
-                          PresenceInMemoryService presenceInMemoryService) {
+                          PresenceInMemoryService presenceInMemoryService,
+                          FirebaseService firebaseService) {
         this.messageDataService = messageDataService;
         this.presenceInMemoryService = presenceInMemoryService;
+        this.firebaseService = firebaseService;
     }
 
+    // Get recent chat messages (ChatListActivity)
     @GetMapping("{userId}")
     public PagedSearchResult<MessageDto> findRecentChats(@PathVariable Long userId,
                                                          @RequestParam Integer pageSize,
@@ -31,15 +39,25 @@ public class ChatController {
         return messageDataService.findRecentSentOrReceived(userId, pageSize, pageNumber);
     }
 
+    // Set presence status
     @GetMapping("presence")
     public List<PresenceEvent> findPresenceStatuses(@RequestParam List<String> phoneNumbers) {
         return presenceInMemoryService.getPresences(phoneNumbers);
     }
 
+    // Send call notification
+    @GetMapping("call")
+    public void sendCallNotification(@RequestParam String senderContactName,
+                                     @RequestParam String receiverPhoneNumber) throws UnsupportedEncodingException {
+        receiverPhoneNumber = URLDecoder.decode(receiverPhoneNumber, StandardCharsets.UTF_8.toString());
+        String senderPhoneNumber = SecurityContextUserProvider.currentPhoneNumber();
+        firebaseService.sendCallNotification(senderContactName, senderPhoneNumber, receiverPhoneNumber);
+    }
+
+    // Backgrounds
     @GetMapping("backgrounds")
     public List<String> findBackgrounds() {
-
-    return List.of(
+        return List.of(
                 "bg-5.png",
                 "bg-6.png",
                 "bg-7.png",

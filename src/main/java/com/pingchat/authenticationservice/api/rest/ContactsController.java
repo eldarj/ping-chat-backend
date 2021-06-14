@@ -28,6 +28,7 @@ public class ContactsController {
         this.smsService = smsService;
     }
 
+    // Get all contacts
     @GetMapping
     public PagedSearchResult<ContactDto> findAll(Integer pageSize, Integer pageNumber,
                                                  Long userId, Boolean favourites) {
@@ -44,15 +45,37 @@ public class ContactsController {
         return pagedContactDtos;
     }
 
+    // Search by name or phonenumber
     @GetMapping("search")
     public List<ContactDto> findAllByNameOrPhonenumber(Long userId, String searchQuery) {
         return contactDataService.findAllByNameOrPhonenumber(userId, searchQuery);
     }
 
+    // Find single by phonenumber
+    @GetMapping("{phoneNumber}")
+    public ContactDto findByFullPhoneNumber(@PathVariable String phoneNumber) {
+        Long currentUserId = SecurityContextUserProvider.currentUserId();
+        return contactDataService.findByUserAndPeer(currentUserId, phoneNumber);
+    }
+
+    // Find single by user and peer
+    @GetMapping("{userId}/search/{peerId}")
+    public ContactDto findByUserAndPeer(@PathVariable Long userId, @PathVariable Long peerId) {
+        return contactDataService.findByUserAndPeer(userId, peerId);
+    }
+
+    // Find recent contacts
+    @GetMapping("recent")
+    public List<ContactDto> findRecentContacts() {
+        Long userId = SecurityContextUserProvider.currentUserId();
+        return contactDataService.findRecent(userId);
+    }
+
+    // Add single contact (Form)
     @PostMapping
     public Map<String, Object> addContact(@RequestBody ContactDto contactDto) {
         Map<String, Object> response = new HashMap<>();
-        String currentUserPhoneNumber = SecurityContextUserProvider.currentUserPrincipal();
+        String currentUserPhoneNumber = SecurityContextUserProvider.currentPhoneNumber();
 
         try {
             response.put("contact", contactDataService.addContact(currentUserPhoneNumber, contactDto));
@@ -63,10 +86,11 @@ public class ContactsController {
         return response;
     }
 
+    // Add single contact (QR Code)
     @PostMapping("qr")
     public ContactDto addContact(@RequestBody String contactPhoneNumber) {
         contactPhoneNumber = contactPhoneNumber.replaceAll("\"", "");
-        String currentUserPhoneNumber = SecurityContextUserProvider.currentUserPrincipal();
+        String currentUserPhoneNumber = SecurityContextUserProvider.currentPhoneNumber();
 
         ContactDto contactDto = contactDataService.findByUserAndPeer(currentUserPhoneNumber, contactPhoneNumber);
 
@@ -77,21 +101,17 @@ public class ContactsController {
         return contactDto;
     }
 
-
-    @GetMapping("{userId}/search/{peerId}")
-    public ContactDto findByUserAndPeer(@PathVariable Long userId, @PathVariable Long peerId) {
-        return contactDataService.findByUserAndPeer(userId, peerId);
-    }
-
+    // Sync multiple contacts from cotnactbook
     @PostMapping("sync")
     public List<ContactDto> addContacts(@RequestBody List<ContactDto> contacts) {
-        return contactDataService.addContacts(SecurityContextUserProvider.currentUserPrincipal(), contacts);
+        return contactDataService.addContacts(SecurityContextUserProvider.currentPhoneNumber(), contacts);
     }
 
-    // TODO Include app download link
+    // TODO: Include app download link
+    // Send invite
     @PostMapping("invite")
     public void inviteContact(@RequestBody String phoneNumber) throws IOException, InterruptedException {
-        String currentUserPhoneNumber = SecurityContextUserProvider.currentUserPrincipal();
+        String currentUserPhoneNumber = SecurityContextUserProvider.currentPhoneNumber();
         phoneNumber = phoneNumber.replaceAll("\"", "");
         smsService.sendSms(
                 String.format("Upravo ste dobili pozivnicu za Ping Chat od %s", currentUserPhoneNumber),
@@ -100,18 +120,13 @@ public class ContactsController {
         );
     }
 
+    // Update favourite status
     @PostMapping("{contactId}/favourite")
     public void updateFavouriteStatus(@PathVariable Long contactId, @RequestBody Boolean isFavourite) {
         contactDataService.updateFavouriteStatus(contactId, isFavourite);
     }
 
-    @DeleteMapping("{contactId}/delete")
-    public void deleteContact(@PathVariable Long contactId,
-                              @RequestParam Long contactBindingId,
-                              @RequestParam Long userId) {
-        contactDataService.delete(contactId, contactBindingId, userId);
-    }
-
+    // Update contact name
     @PostMapping("{contactId}/name")
     public void updateContactName(@PathVariable Long contactId,
                                   @RequestBody String contactName,
@@ -120,10 +135,19 @@ public class ContactsController {
         contactDataService.updateContactName(contactId, contactName, contactBindingId);
     }
 
+    // Update chat background
     @PostMapping("{contactId}/background")
     public void updateBackground(@PathVariable Long contactId, @RequestBody String background) {
         background = background.replaceAll("\"", "");
         contactDataService.updateBackground(contactId, background);
+    }
+
+    // Delete contact
+    @DeleteMapping("{contactId}/delete")
+    public void deleteContact(@PathVariable Long contactId,
+                              @RequestParam Long contactBindingId,
+                              @RequestParam Long userId) {
+        contactDataService.delete(contactId, contactBindingId, userId);
     }
 }
 

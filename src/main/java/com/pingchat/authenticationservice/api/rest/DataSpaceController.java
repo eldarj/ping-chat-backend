@@ -1,6 +1,7 @@
 package com.pingchat.authenticationservice.api.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pingchat.authenticationservice.auth.util.SecurityContextUserProvider;
 import com.pingchat.authenticationservice.model.dto.DSNodeDto;
 import com.pingchat.authenticationservice.service.data.DataSpaceDataService;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,10 @@ import java.util.Optional;
 @RequestMapping("/api/data-space")
 public class DataSpaceController {
     @Value("${service.static-base-path}")
-    protected String staticBasePath;
+    private String STATIC_BASE_PATH;
+
+    @Value("${service.static-ip-base}")
+    private String STATIC_IP_BASE;
 
     private static final String X_LOCATION_HEADER_KEY = "X-Location";
     private static final String X_NODE_ID_HEADER_KEY = "X-NodeId";
@@ -48,36 +52,31 @@ public class DataSpaceController {
         this.objectMapper = objectMapper;
     }
 
+    // Get user's data space
     @GetMapping("{userId}")
     public List<DSNodeDto> getDataSpace(@PathVariable Long userId) {
         return dataSpaceDataService.getDataSpace(userId);
     }
 
+    // Get Received directory
     @GetMapping("{userId}/received")
     public List<DSNodeDto> getReceivedDataSpace(@PathVariable Long userId) {
         return dataSpaceDataService.getAllReceived(userId);
     }
 
+    // Get Sent directory
+    @GetMapping("{userId}/sent")
+    public List<DSNodeDto> getReceivedDataSpace(@PathVariable Long userId, @RequestParam Long directoryId) {
+        return dataSpaceDataService.getAllSent(userId, directoryId);
+    }
+
+    // Get Directory
     @GetMapping("{userId}/{directoryId}")
     public List<DSNodeDto> getDirectory(@PathVariable Long userId, @PathVariable Long directoryId) {
         return dataSpaceDataService.getDirectory(userId, directoryId);
     }
 
-    @PostMapping("{userId}/directory")
-    public DSNodeDto createDirectory(@PathVariable Long userId, @RequestBody DSNodeDto dsNode) {
-        return dataSpaceDataService.create(dsNode);
-    }
-
-    @DeleteMapping("directory/{directoryId}")
-    public void deleteDirectory(@PathVariable Long directoryId) {
-        dataSpaceDataService.deleteDirectoryByNodeId(directoryId);
-    }
-
-    @DeleteMapping("directory/{directoryId}/content")
-    public void deleteDirectoryContent(@PathVariable Long directoryId) {
-        dataSpaceDataService.deleteDirectoryContentByNodeId(directoryId);
-    }
-
+    // Get Shared data (SingleContactActivity and SharedActivity)
     @GetMapping("shared")
     public List<DSNodeDto> getSharedDataSpace(@RequestParam Long userId,
                                               @RequestParam Long contactId,
@@ -89,8 +88,28 @@ public class DataSpaceController {
         }
     }
 
+    // Create directory
+    @PostMapping("{userId}/directory")
+    public DSNodeDto createDirectory(@PathVariable Long userId, @RequestBody DSNodeDto dsNode) {
+        return dataSpaceDataService.create(dsNode);
+    }
+
+    // Delete directory
+    @DeleteMapping("directory/{directoryId}")
+    public void deleteDirectory(@PathVariable Long directoryId) {
+        dataSpaceDataService.deleteDirectoryByNodeId(directoryId);
+    }
+
+    // Delete file
+    @DeleteMapping
+    public void deleteById(@RequestParam Long nodeId, @RequestParam String fileName) throws IOException {
+        Long userId = SecurityContextUserProvider.currentUserId();
+        dataSpaceDataService.deleteForUser(nodeId, userId);
+    }
+
+    // Upload file
     @RequestMapping(value = {"/upload", "/upload/**"},
-            method = {RequestMethod.POST, RequestMethod.PATCH, RequestMethod.HEAD})
+            method = { RequestMethod.POST, RequestMethod.PATCH, RequestMethod.HEAD })
     public void upload(final HttpServletRequest servletRequest, final HttpServletResponse servletResponse)
             throws IOException, TusException {
         tusFileUploadService.process(servletRequest, servletResponse);
@@ -102,9 +121,9 @@ public class DataSpaceController {
 
             try (InputStream inputStream = this.tusFileUploadService.getUploadedBytes(uploadUrl)) {
                 String fileName = uploadInfo.getFileName();
-                String fileUrl = "http://192.168.0.13:8089/files/uploads/" + fileName;
+                String fileUrl = STATIC_IP_BASE + "/uploads/" + fileName;
 
-                Path output = Paths.get(staticBasePath + "/uploads").resolve(fileName);
+                Path output = Paths.get(STATIC_BASE_PATH + "/uploads").resolve(fileName);
                 Files.copy(inputStream, output, StandardCopyOption.REPLACE_EXISTING);
 
                 String dsNodeEncoded = uploadInfo.getMetadata().get("dsNodeEncoded");
@@ -117,17 +136,18 @@ public class DataSpaceController {
                 servletResponse.setHeader(X_LOCATION_HEADER_KEY, fileUrl);
                 servletResponse.setHeader(X_NODE_ID_HEADER_KEY, String.valueOf(dsNode.getId()));
 
-                log.info("Uploaded file to {}", output.toString());
+                log.info("Uploaded file to {}", output);
             }
 
             this.tusFileUploadService.deleteUpload(uploadUrl);
         }
     }
 
-    @Retryable(value = UploadAlreadyLockedException.class, backoff = @Backoff(delay = 10_000L))
+    // Delete during upload
     @DeleteMapping("/upload/{uploadUrl}")
-    public ResponseEntity<Object> deleteDuringUpload(@PathVariable String uploadUrl, @RequestParam String fileName)
-            throws IOException, TusException {
+    @Retryable(value = UploadAlreadyLockedException.class, backoff = @Backoff(delay = 10_000L))
+    public ResponseEntity<Object> deleteDuringUpload(@PathVariable String uploadUrl,
+                                                     @RequestParam String fileName) throws IOException, TusException {
         UploadInfo uploadInfo = this.tusFileUploadService.getUploadInfo(uploadUrl);
 
         if (uploadInfo == null && !StringUtils.hasLength(fileName)) {
@@ -135,19 +155,15 @@ public class DataSpaceController {
         }
 
         if (uploadInfo != null) {
-            Files.deleteIfExists(Paths.get(staticBasePath + "/uploads").resolve(uploadInfo.getFileName()));
+            Files.deleteIfExists(Paths.get(STATIC_BASE_PATH + "/uploads").resolve(uploadInfo.getFileName()));
             this.tusFileUploadService.deleteUpload(uploadUrl);
+
         } else if (StringUtils.hasLength(fileName)) {
-            Files.deleteIfExists(Paths.get(staticBasePath + "/uploads").resolve(fileName));
+            Files.deleteIfExists(Paths.get(STATIC_BASE_PATH + "/uploads").resolve(fileName));
         }
+
         dataSpaceDataService.deleteByUploadId(uploadUrl);
 
         return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping
-    public void delete(@RequestParam String nodeId, @RequestParam String fileName) throws IOException {
-        dataSpaceDataService.deleteByNodeId(Long.parseLong(nodeId));
-        Files.deleteIfExists(Paths.get(staticBasePath + "/uploads").resolve(fileName));
     }
 }
