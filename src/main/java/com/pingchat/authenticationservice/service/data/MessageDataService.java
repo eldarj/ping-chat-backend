@@ -6,13 +6,13 @@ import com.pingchat.authenticationservice.data.mysql.entity.ContactEntity;
 import com.pingchat.authenticationservice.data.mysql.entity.MessageEntity;
 import com.pingchat.authenticationservice.data.mysql.repository.ContactRepository;
 import com.pingchat.authenticationservice.data.mysql.repository.MessageRepository;
+import com.pingchat.authenticationservice.enums.MessageType;
 import com.pingchat.authenticationservice.model.dto.MessageDto;
 import com.pingchat.authenticationservice.model.event.PresenceEvent;
 import com.pingchat.authenticationservice.service.memory.PresenceInMemoryService;
 import com.pingchat.authenticationservice.service.memory.UnreadMessagesInMemoryService;
 import com.pingchat.authenticationservice.util.pagination.PagedSearchResult;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.bridge.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -30,20 +30,23 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 @Service
 public class MessageDataService {
+    private final DataSpaceDataService dataSpaceDataService;
+
     private final MessageRepository messageRepository;
     private final ContactRepository contactRepository;
 
     private final ObjectMapper objectMapper;
 
     private final PresenceInMemoryService presenceInMemoryService;
-
     private final UnreadMessagesInMemoryService unreadMessagesInMemoryService;
 
-    public MessageDataService(MessageRepository messageRepository,
+    public MessageDataService(DataSpaceDataService dataSpaceDataService,
+                              MessageRepository messageRepository,
                               ContactRepository contactRepository,
                               ObjectMapper objectMapper,
                               PresenceInMemoryService presenceInMemoryService,
                               UnreadMessagesInMemoryService unreadMessagesInMemoryService) {
+        this.dataSpaceDataService = dataSpaceDataService;
         this.unreadMessagesInMemoryService = unreadMessagesInMemoryService;
         this.messageRepository = messageRepository;
         this.contactRepository = contactRepository;
@@ -51,10 +54,7 @@ public class MessageDataService {
         this.presenceInMemoryService = presenceInMemoryService;
     }
 
-    public MessageDto findById(Long messageId) {
-        return objectMapper.convertValue(messageRepository.findById(messageId), MessageDto.class);
-    }
-
+    // Get recent messages
     public PagedSearchResult<MessageDto> findRecentSentOrReceived(Long userId, int pageSize, int pageNumber) {
         List<MessageEntity> messageEntitiesPage = messageRepository.findDistinctByUser(userId,
                 pageSize, pageNumber * pageSize);
@@ -107,6 +107,7 @@ public class MessageDataService {
         );
     }
 
+    // Get messages by contact
     public PagedSearchResult<MessageDto> findMessagesByContactBindingId(Long userId,
                                                                         Long contactBindingId,
                                                                         PageRequest pageRequest) {
@@ -142,8 +143,11 @@ public class MessageDataService {
         return pagedSearchResult;
     }
 
+    // Get pinned messages by contact
     public List<MessageDto> findPinnedMessagesByUsers(Long userId, Long contactUserId) {
-        List<MessageEntity> messageEntities = messageRepository.findPinnedMessagesByUsers(userId, contactUserId);
+        List<MessageEntity> messageEntities = messageRepository.findPinnedMessagesByUsers(userId, contactUserId)
+                .stream().filter(message -> message.getMessageType() != MessageType.PIN_INFO)
+                .collect(toList());
 
         return objectMapper.convertValue(messageEntities, new TypeReference<>() {});
     }
@@ -155,28 +159,7 @@ public class MessageDataService {
         return objectMapper.convertValue(messageEntity, MessageDto.class);
     }
 
-    @Transactional
-    public void updateToSeen(long messageId) {
-        messageRepository.setToSeen(messageId);
-    }
-
-
-    @Transactional
-    public void updateToReceived(long messageId) {
-        messageRepository.setToReceived(messageId);
-    }
-
-    @Transactional
-    public void deleteForUser(Long messageId, Long userId) {
-        messageRepository.deleteForUser(messageId, userId);
-    }
-
-    @Transactional
-    public void deleteAllForUser(Long contactBindingId, Long userId) {
-        messageRepository.deleteByContactBindingId(contactBindingId, userId);
-    }
-
-    // TODO: Remove unused?
+    // Pin / unpin
     @Transactional
     public void updatePinnedStatus(Long messageId, Boolean isPinned) {
         Optional<MessageEntity> optionalMessageEntity = messageRepository.findById(messageId);
@@ -188,6 +171,7 @@ public class MessageDataService {
         }
     }
 
+    // Edit
     // TODO: Push edit-change to receiver
     @Transactional
     public void update(Long messageId, String text) {
@@ -200,5 +184,50 @@ public class MessageDataService {
 
             messageRepository.save(messageEntity);
         }
+    }
+
+    // Status
+    @Transactional
+    public void updateToSeen(long messageId) {
+        messageRepository.setToSeen(messageId);
+    }
+
+    @Transactional
+    public void updateToReceived(long messageId) {
+        messageRepository.setToReceived(messageId);
+    }
+
+    // Delete
+    @Transactional
+    public void deleteForUser(Long messageId, Long userId) {
+        Optional<MessageEntity> optionalMessageEntity = messageRepository.findById(messageId);
+
+        if (optionalMessageEntity.isPresent()) {
+            Long nodeId = optionalMessageEntity.get().getNodeId();
+            if (nodeId != null) {
+                dataSpaceDataService.deleteForUser(nodeId, userId);
+            }
+        }
+
+        messageRepository.deleteForUser(messageId, userId);
+    }
+
+    @Transactional
+    public void deleteForEveryone(Long messageId) {
+        Optional<MessageEntity> optionalMessageEntity = messageRepository.findById(messageId);
+
+        if (optionalMessageEntity.isPresent()) {
+            Long nodeId = optionalMessageEntity.get().getNodeId();
+            if (nodeId != null) {
+                dataSpaceDataService.deleteByNodeId(nodeId);
+            }
+        }
+
+        messageRepository.deleteById(messageId);
+    }
+
+    @Transactional
+    public void deleteAllForUser(Long contactBindingId, Long userId) {
+        messageRepository.deleteByContactBindingId(contactBindingId, userId);
     }
 }

@@ -16,13 +16,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
@@ -42,6 +43,7 @@ public class ContactDataService {
         this.objectMapper = objectMapper;
     }
 
+    // Search
     public PagedSearchResult<ContactDto> findAllByFilter(Integer pageSize, Integer pageNumber, Long userId,
                                                          boolean favourites) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -55,6 +57,7 @@ public class ContactDataService {
     }
 
 
+    // Get contacts
     public List<ContactDto> findAllByNameOrPhonenumber(Long userId, String searchQuery) {
         return contactRepository.findAllByNameOrPhonenumber(userId, searchQuery).stream()
                 .map(contactEntity -> objectMapper.convertValue(contactEntity, ContactDto.class))
@@ -65,12 +68,31 @@ public class ContactDataService {
         return objectMapper.convertValue(contactRepository.findByUserIdAndContactUserId(userId, peerId), ContactDto.class);
     }
 
+    public ContactDto findByUserAndPeer(Long userId, String contactPhoneNumber) {
+        return objectMapper.convertValue(
+                contactRepository.findByUserIdAndContactPhoneNumber(userId, contactPhoneNumber),
+                ContactDto.class);
+    }
+
     public ContactDto findByUserAndPeer(String userPhoneNumber, String contactPhoneNumber) {
         return objectMapper.convertValue(
                 contactRepository.findByUserPhoneNumberAndContactPhoneNumber(userPhoneNumber, contactPhoneNumber),
                 ContactDto.class);
     }
 
+    // Find recent contacts
+    public List<ContactDto> findRecent(Long userId) {
+        List<MessageEntity> messageEntities = messageRepository.findDistinctByUser(userId, 10, 0);
+
+        List<ContactEntity> contactEntities = messageEntities.stream()
+                .map(message -> contactRepository.findByUserIdAndContactBindingId(userId, message.getContactBindingId()))
+                .collect(toList());
+
+        return objectMapper.convertValue(contactEntities, new TypeReference<>() {
+        });
+    }
+
+    // Add contact (Form)
     @Transactional
     public ContactDto addContact(String currentPhoneNumber, ContactDto contactDto) {
         ContactEntity contactEntity = objectMapper.convertValue(contactDto, ContactEntity.class);
@@ -105,6 +127,7 @@ public class ContactDataService {
         return objectMapper.convertValue(contactEntity, ContactDto.class);
     }
 
+    // Add contact by phonenumber (QR Scanner)
     public ContactDto addContact(String currentPhoneNumber, String contactPhoneNumber) {
         ContactEntity contactEntity = new ContactEntity();
 
@@ -147,6 +170,7 @@ public class ContactDataService {
         return objectMapper.convertValue(contactEntity, ContactDto.class);
     }
 
+    // Add multiple contacts (Contact book Sync)
     public List<ContactDto> addContacts(String currentPhoneNumber, List<ContactDto> contacts) {
         List<ContactEntity> contactEntities = objectMapper.convertValue(contacts, new TypeReference<>() {});
 
@@ -188,6 +212,7 @@ public class ContactDataService {
         return objectMapper.convertValue(savedContacts, new TypeReference<>() {});
     }
 
+    // Updates
     @Transactional
     public void updateFavouriteStatus(Long contactId, Boolean isFavourite) {
         log.info("Updating {} favourites status to {}", contactId, isFavourite);
@@ -201,7 +226,7 @@ public class ContactDataService {
         MessageEntity messageEntity = messageRepository.findSingleByContactBindingId(contactBindingId);
 
         if (messageEntity != null) {
-            if (messageEntity.getReceiver().getFullPhoneNumber().equals(SecurityContextUserProvider.currentUserPrincipal())) {
+            if (messageEntity.getReceiver().getFullPhoneNumber().equals(SecurityContextUserProvider.currentPhoneNumber())) {
                 messageEntity.setSenderContactName(contactName);
             } else {
                 messageEntity.setReceiverContactName(contactName);
@@ -220,6 +245,7 @@ public class ContactDataService {
         contactRepository.updateBackground(contactId, background);
     }
 
+    // Delete
     @Transactional
     public void delete(Long contactId, Long contactBindingId, Long userId) {
         messageRepository.deleteByContactBindingId(contactBindingId, userId);
