@@ -1,20 +1,21 @@
 package com.pingchat.authenticationservice.data.mysql.entity;
 
 import com.pingchat.authenticationservice.enums.MessageType;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
-@ToString(exclude = {"sender", "receiver"})
-@EqualsAndHashCode(exclude = {"sender", "receiver"})
 @Entity
 @Table(name = "messages")
+@ToString(exclude = {"sender", "receiver"})
+@EqualsAndHashCode(exclude = {"sender", "receiver"})
 public class MessageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -41,34 +42,29 @@ public class MessageEntity {
     @NotNull
     private Long sentTimestamp = Instant.now().toEpochMilli();
 
-    // denormalized for performance
     private String senderContactName;
-
     private String receiverContactName;
-
-    private String fileName;
-
-    private String filePath;
-
-    private String fileUrl;
-
-    private Long fileSizeBytes;
 
     private MessageType messageType = MessageType.TEXT_MESSAGE;
 
+    private String fileName;
+    private String filePath;
+    private String fileUrl;
+    private Long fileSizeBytes;
     private String recordingDuration;
-
     private Long nodeId;
 
     private String deletedForUserIds = "";
 
     private boolean isPinned;
-
     private Long pinnedTimestamp;
-
     private boolean isEdited;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "reply_message_id")
     private ReplyEntity replyMessage;
+
+    // Call info - neutral message
+    private String callDuration;
+    private String callType;
 }
