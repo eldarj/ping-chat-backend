@@ -3,8 +3,9 @@ server:
 
 service:
   name: ping-authentication-service
-  static-base-path: /home/${user.name}/application/${service.name}/files
-  profile-images-path: ${service.static-base-path}/profiles
+  static-base-path: ${SERVICE_STATIC_BASE_PATH}
+  profile-images-path: ${SERVICE_PROFILE_IMAGES_PATH}
+  static-ip-base: ${SERVICE_STATIC_IP_BASE}
 
 spring:
   servlet:
@@ -12,15 +13,15 @@ spring:
       max-request-size: 15MB
       max-file-size: 15MB
   profiles:
-    active: production
+    active: ${SPRING_PROFILES:development}
 
   datasource:
-    url: jdbc:mysql://localhost:3306/ping_db?useSSL=true&serverTimezone=UTC
-    username: ping
-    password: ping
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
 
   jpa:
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -28,11 +29,11 @@ spring:
         dialect.storage_engine: innodb
 
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${HIBERNATE_DDL_AUTO} # update
 
 jwt:
-  secret: ultraProductinReadySecretKey
-  issuer: PingPlatform
+  secret: ${JWT_SECRET}
+  issuer: ${JWT_ISSUER}
 
 freeswitch:
-  host: 127.0.0.1
+  host: ${FREESWITCH_HOST}

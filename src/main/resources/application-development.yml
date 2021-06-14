@@ -5,6 +5,7 @@ service:
   name: ping-authentication-service
   static-base-path: /home/${user.name}/application/${service.name}/files
   profile-images-path: ${service.static-base-path}/profiles
+  static-ip-base: http://192.168.0.13:8089/files
 
 spring:
   servlet:
