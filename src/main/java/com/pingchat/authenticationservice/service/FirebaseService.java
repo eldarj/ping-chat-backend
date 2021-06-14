@@ -50,6 +50,37 @@ public class FirebaseService {
         firebaseMessaging.send(message);
     }
 
+    public void sendCallNotification(String senderContactName, String senderPhoneNumber, String receiverPhoneNumber) {
+        try {
+            String receiverFirebaseToken = userFirebaseTokens.get(receiverPhoneNumber);
+            if (receiverFirebaseToken != null) {
+                AndroidNotification notification = AndroidNotification.builder()
+                        .setTitle("Incoming call")
+                        .setBody("Call from " + senderContactName + " " + senderPhoneNumber)
+                        .setIcon("ping_full_launcher_round")
+                        .build();
+
+                Message message = Message.builder()
+                        .setAndroidConfig(AndroidConfig.builder()
+                                .setNotification(notification)
+                                .putAllData(Map.of(
+                                        "click_action", "FLUTTER_INCOMING_CALL",
+                                        "senderPhoneNumber", senderPhoneNumber
+                                ))
+                                .build())
+                        .setToken(receiverFirebaseToken)
+                        .build();
+
+                log.info("Sending firebase call notification(receiver={}, message={})", receiverPhoneNumber, message);
+                firebaseMessaging.send(message);
+            } else {
+                log.warn("Firebase token for receiver not found");
+            }
+        } catch (Exception exception) {
+            log.error("Error sending call notifications", exception);
+        }
+    }
+
     public void sendMessageNotification(MessageDto messageDto) {
         try {
             String receiverPhoneNumber = messageDto.getReceiver().getFullPhoneNumber();
@@ -72,6 +103,8 @@ public class FirebaseService {
                     body = "GIF";
                 } else if (messageType.equals(MessageType.MAP_LOCATION)) {
                     body = "Location";
+                } else if (messageType.equals(MessageType.CALL_INFO)) {
+                    body = "Call";
                 } else {
                     body = "Media";
                 }
