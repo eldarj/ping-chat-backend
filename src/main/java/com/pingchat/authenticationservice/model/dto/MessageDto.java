@@ -29,25 +29,17 @@ public class MessageDto implements Serializable {
     private Long sentTimestamp = Instant.now().toEpochMilli();
 
     private String senderContactName;
-
     private String receiverContactName;
-
     private boolean senderOnline;
-
     private boolean receiverOnline;
-
     private Long senderLastOnlineTimestamp;
-
     private Long receiverLastOnlineTimestamp;
 
     private boolean isChained;
 
     private String fileName;
-
     private String filePath;
-
     private String fileUrl;
-
     private Long fileSizeBytes;
 
     private MessageType messageType = MessageType.TEXT_MESSAGE;
@@ -55,16 +47,15 @@ public class MessageDto implements Serializable {
     private int totalUnreadMessages;
 
     private String recordingDuration;
-
     private Long nodeId;
 
-    private String deletedForUserIds = "";
-
     private boolean isPinned;
-
     private Long pinnedTimestamp;
 
     private boolean isEdited;
-
     private ReplyDto replyMessage;
+
+    // Call info - neutral message
+    private String callDuration;
+    private String callType;
 }

@@ -9,5 +9,6 @@ public enum MessageType {
     FILE,
     RECORDING,
     MAP_LOCATION,
-    PIN_INFO
+    PIN_INFO,
+    CALL_INFO
 }
