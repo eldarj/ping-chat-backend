@@ -39,9 +39,6 @@ public class SmsService {
                 .POST(bodyPublisher)
                 .build();
 
-        // uncomment this for sending real SMS -> otherwise just check the mysql db and copy the pin code, authentication
-        // will work properly
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-//        String pox = "asd";
+        client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 }
