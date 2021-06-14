@@ -124,16 +124,12 @@ public class UserSeeder implements CommandLineRunner {
     public void run(String... args) {
         try {
             log.info("Seeding country codes...");
-            CountryCodeEntity countryCodeEntity = new CountryCodeEntity();
-            countryCodeEntity.setCountryName("Bosnia and Herzegovina");
-            countryCodeEntity.setDialCode("+387");
-            countryCodeEntity = countryCodeRepository.save(countryCodeEntity);
-
-            CountryCodeEntity countryCodeEntity2 = new CountryCodeEntity();
-            countryCodeEntity2.setCountryName("Serbia");
-            countryCodeEntity2.setDialCode("+381");
-            countryCodeEntity2 = countryCodeRepository.save(countryCodeEntity2);
-            log.info("Saved country codes {}", List.of(countryCodeEntity, countryCodeEntity2));
+            CountryCodeEntity countryCodeEntity = seedCountryCode("Bosnia and Herzegovina", "+387");
+            seedCountryCode("Serbia", "+381");
+            seedCountryCode("Croatia", "+385");
+            seedCountryCode("Slovenia", "+386");
+            seedCountryCode("Germany", "+49");
+            seedCountryCode("Switzerland", "+41");
 
             log.info("Seeding users...");
             UserEntity userEntity = new UserEntity();
@@ -331,5 +327,16 @@ public class UserSeeder implements CommandLineRunner {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private CountryCodeEntity seedCountryCode(String countryName, String dialCode) {
+        CountryCodeEntity countryCodeEntity = new CountryCodeEntity();
+        countryCodeEntity.setCountryName(countryName);
+        countryCodeEntity.setDialCode(dialCode);
+
+        countryCodeEntity = countryCodeRepository.save(countryCodeEntity);
+        log.info("Saved country code {}", countryCodeEntity);
+
+        return countryCodeEntity;
     }
 }
