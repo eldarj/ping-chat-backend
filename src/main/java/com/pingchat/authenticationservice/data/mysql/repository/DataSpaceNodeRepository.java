@@ -8,16 +8,17 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface DataSpaceNodeRepository extends JpaRepository<DSNodeEntity, Long> {
+    // Getters
     @Query("SELECT ds FROM DSNodeEntity ds WHERE " +
-            "ds.deletedByOwner = FALSE AND " +
+            "ds.deletedForUserIds NOT LIKE CONCAT('%:', :userId, ':%') AND " +
             "(" +
-            "(ds.ownerId = :userId AND ds.receiverId = :anotherUserId) OR " +
-            "(ds.ownerId = :anotherUserId AND ds.receiverId = :userId)" +
+            "(ds.ownerId = :userId AND ds.receiverId = :peerId) OR " +
+            "(ds.ownerId = :peerId AND ds.receiverId = :userId)" +
             ")")
-    List<DSNodeEntity> findSharedDataByUsers(Long userId, Long anotherUserId);
+    List<DSNodeEntity> findSharedDataByUsers(Long userId, Long peerId);
 
-    @Query(value = "SELECT ds.* FROM dataspace_nodes ds " +
-            "WHERE ds.deleted_by_owner = false AND " +
+    @Query(value = "SELECT ds.* FROM dataspace_nodes ds WHERE " +
+            "ds.deleted_for_user_ids NOT LIKE CONCAT('%:', ?1, '%:') AND " +
             "(" +
             "(ds.owner_id = ?1 AND ds.receiver_id = ?2) OR " +
             "(ds.owner_id = ?2 AND ds.receiver_id = ?1)" +
@@ -25,26 +26,37 @@ public interface DataSpaceNodeRepository extends JpaRepository<DSNodeEntity, Lon
             "ORDER BY ds.created_timestamp DESC " +
             "LIMIT ?3 OFFSET 0",
             nativeQuery = true)
-    List<DSNodeEntity> findSharedDataByUsersLimit(Long userId, Long anotherUserId, Long nodesCount);
+    List<DSNodeEntity> findSharedDataByUsersLimit(Long userId, Long peerId, Long nodesCount);
 
-    @Query("SELECT ds FROM DSNodeEntity ds WHERE ds.ownerId = :userId")
-    List<DSNodeEntity> findDataByUser(Long userId);
+    @Query("SELECT ds FROM DSNodeEntity ds WHERE " +
+            "ds.deletedForUserIds NOT LIKE CONCAT('%:', :userId, ':%') AND " +
+            "ds.parentDirectoryNodeId = :parentDirectoryNodeId")
+    List<DSNodeEntity> findAllByParentDirectoryNodeId(Long parentDirectoryNodeId, Long userId);
+
+    @Query("SELECT ds FROM DSNodeEntity ds WHERE " +
+            "ds.deletedForUserIds NOT LIKE CONCAT('%:', :userId, ':%') AND " +
+            "ds.parentDirectoryNodeId = :parentDirectoryNodeId")
+    List<DSNodeEntity> findAllByDirectory(Long parentDirectoryNodeId, Long userId);
 
     List<DSNodeEntity> findAllByParentDirectoryNodeId(Long parentDirectoryNodeId);
 
-    List<DSNodeEntity> findAllByReceiverId(Long receiverId);
-
+    @Query("SELECT ds FROM DSNodeEntity ds WHERE " +
+            "ds.deletedForUserIds NOT LIKE CONCAT('%:', :ownerId, ':%') AND " +
+            "ds.ownerId = :ownerId AND " +
+            "ds.parentDirectoryNodeId IS NULL")
     List<DSNodeEntity> findAllByOwnerIdAndParentDirectoryNodeIdIsNull(Long ownerId);
 
-    @Modifying
-    @Query("UPDATE DSNodeEntity ds SET ds.deletedByOwner = true WHERE ds.id = :messageId")
-    void setDeletedByOwner(Long messageId);
+    @Query("SELECT ds FROM DSNodeEntity ds WHERE " +
+            "ds.deletedForUserIds NOT LIKE CONCAT('%:', :receiverId, ':%') AND " +
+            "ds.receiverId = :receiverId")
+    List<DSNodeEntity> findAllByReceiverId(Long receiverId);
 
-    @Modifying
-    @Query("UPDATE DSNodeEntity ds SET ds.deletedByReceiver = true WHERE ds.id = :messageId")
-    void setDeletedByReceiver(Long messageId);
-
+    // Deletes
     void deleteByUploadId(String uploadId);
 
-    void deleteAllByParentDirectoryNodeId(Long nodeId);
+    @Modifying
+    @Query("UPDATE DSNodeEntity ds " +
+            "SET ds.deletedForUserIds = CONCAT(ds.deletedForUserIds, ':', :userId, ':') " +
+            "WHERE ds.id = :nodeId")
+    void deleteForUser(Long nodeId, Long userId);
 }

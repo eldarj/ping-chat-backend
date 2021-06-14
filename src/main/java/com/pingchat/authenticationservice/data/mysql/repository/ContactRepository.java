@@ -1,7 +1,6 @@
 package com.pingchat.authenticationservice.data.mysql.repository;
 
 import com.pingchat.authenticationservice.data.mysql.entity.ContactEntity;
-import com.pingchat.authenticationservice.model.dto.ContactDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +13,7 @@ import java.util.List;
 
 @Repository
 public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
+    // Getters
     Page<ContactEntity> findAllByUserIdAndIsDeletedIsFalseOrderByContactNameAsc(Long userId, Pageable pageable);
 
     Page<ContactEntity> findAllByUserIdAndIsFavoriteAndIsDeletedIsFalseOrderByContactNameAsc(Long userId,
@@ -30,12 +30,15 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
 
     ContactEntity findByUserIdAndContactUserId(Long userId, Long contactUserId);
 
-    ContactEntity findByUserIdAndContactBindingId(Long userId, long contactUserId);
+    ContactEntity findByUserIdAndContactBindingId(Long userId, long contactBindingId);
+
+    ContactEntity findByUserIdAndContactPhoneNumber(Long userId, String contactPhoneNumber);
 
     ContactEntity findByUserPhoneNumberAndContactPhoneNumber(String userPhoneNumber, String contactPhoneNumber);
 
     List<ContactEntity> findAllByContactPhoneNumber(String contactPhoneNumber);
 
+    // Updates
     @Modifying
     @Transactional
     @Query(value = "UPDATE contacts SET contact_id = ?2 WHERE contact_phone_number = ?1",

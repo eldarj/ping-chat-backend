@@ -1,7 +1,6 @@
 package com.pingchat.authenticationservice.data.mysql.repository;
 
 import com.pingchat.authenticationservice.data.mysql.entity.MessageEntity;
-import com.pingchat.authenticationservice.model.dto.MessageDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
+
+    // Get messages
     @Query(value = "SELECT m.* FROM (" +
             "SELECT max(sent_timestamp) AS sent_timestamp FROM messages " +
             "WHERE deleted_for_user_ids NOT LIKE CONCAT('%:', ?1, ':%')" +
@@ -56,17 +57,17 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             ") ORDER BY m.sentTimestamp DESC")
     List<MessageEntity> findPinnedMessagesByUsers(Long userId, Long contactUserId);
 
+
+    // Updates
     @Modifying
     @Query("UPDATE MessageEntity m SET m.seen = true WHERE m.id = :messageId")
     void setToSeen(long messageId);
-
 
     @Modifying
     @Query("UPDATE MessageEntity m SET m.received = true WHERE m.id = :messageId")
     void setToReceived(long messageId);
 
-    void deleteByNodeId(Long nodeId); // TODO: Check if works for peers
-
+    // Deletes
     @Modifying
     @Query("UPDATE MessageEntity m " +
             "SET m.deletedForUserIds = CONCAT(m.deletedForUserIds, ':', :userId, ':') " +
