@@ -1,23 +1,37 @@
 package com.pingchat.authenticationservice.util.seeder;
 
-import com.pingchat.authenticationservice.data.mysql.entity.*;
-import com.pingchat.authenticationservice.data.mysql.repository.*;
+import com.pingchat.authenticationservice.data.mysql.entity.ContactEntity;
+import com.pingchat.authenticationservice.data.mysql.entity.CountryCodeEntity;
+import com.pingchat.authenticationservice.data.mysql.entity.MessageEntity;
+import com.pingchat.authenticationservice.data.mysql.entity.UserEntity;
+import com.pingchat.authenticationservice.data.mysql.repository.ContactRepository;
+import com.pingchat.authenticationservice.data.mysql.repository.CountryCodeRepository;
+import com.pingchat.authenticationservice.data.mysql.repository.MessageRepository;
+import com.pingchat.authenticationservice.data.mysql.repository.UserRepository;
 import com.pingchat.authenticationservice.enums.MessageType;
 import com.pingchat.authenticationservice.service.data.DataSpaceDataService;
 import com.pingchat.authenticationservice.util.UniqueUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 
 @Slf4j
-@Component("userSeeder")
 @Profile("seeder")
+@Component("userSeeder")
 public class UserSeeder implements CommandLineRunner {
+    @Value("${service.static-ip-base}")
+    private String STATIC_IP_BASE;
+
     private final CountryCodeRepository countryCodeRepository;
     private final UserRepository userRepository;
     private final ContactRepository contactRepository;
@@ -37,19 +51,38 @@ public class UserSeeder implements CommandLineRunner {
             "Josipovic", "Osim", "Maric", "Lukic", "Borovic", "Mehmedovic", "Spago");
 
     private final List<String> seedingAvatars = List.of(
-            "https://images.pexels.com/users/avatars/2272619/rachel-claire-647.jpeg?auto=compress&fit=crop&h=256&w=256",
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMnQXZsq16O6PnxLOZC40Ry_HgVoI-FjfwBg&usqp=CAU",
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaq3uUJbou0ypc_1QC-AMzJFuON138fJb4HQ&usqp=CAU",
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzd2RuqRy9hb2HyritqnEJMkOgmYByumXQWg&usqp=CAU",
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRpApFj077ey3pzZ9cNGOdRUeGMlK40qV8Qkg&usqp=CAU",
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcrNfGlxv29FTGxAeIO9aTl4SdQhEEy8hZpg&usqp=CAU",
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3lwOzijJqyTX9UxQ5CuPVQsnJ5zsttbfYow&usqp=CAU",
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTpi269wVddq5JnoYxwpoYTy2YlR7sJXeULiw&usqp=CAU",
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAeftRlPEMaSJip5A02knegRG6dsgiuzos8w&usqp=CAU",
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyR5teUjOuhvk9qnfrfqCj_IuLS0sHOxs17Q&usqp=CAU",
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgHclVKvHedn6Ajd9Zy8MD3VQam9YwVe5Vmg&usqp=CAU",
-            "https://a.thumbs.redditmedia.com/DIgiF5PWb2_NQRUhgowmca2zuuJDXHG54NXiNysMmE8.png",
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQF_w6FQwmxVqCg8M2SfFzQbxnKhZBc2E_Gw&usqp=CAU"
+            "https://images.pexels.com/users/avatars/2272619/rachel-claire-647.jpeg?auto=compress&fit=crop&h=512&w=512",
+            "https://i.pinimg.com/originals/dd/ed/0d/dded0d84d259cbf9b6d1ca78cd3e5d18.jpg",
+            "https://i.pinimg.com/originals/32/71/31/327131a71a6aa9a81ccb94ee5e6b1c95.png",
+            "https://i.pinimg.com/originals/ed/fd/d0/edfdd098e87e726eeebecaa93552a19a.jpg",
+            "https://images.pexels.com/photos/1704488/pexels-photo-1704488.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
+            "https://ak.picdn.net/shutterstock/videos/4422329/thumb/1.jpg",
+            "https://images.pexels.com/photos/3033872/pexels-photo-3033872.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
+            "https://img.freepik.com/free-photo/portrait-young-beautiful-african-girl-dark-wall_176420-5818.jpg?size=626&ext=jpg",
+            "https://mapio.net/images-p/3328081.jpg",
+            "https://media-cache.cinematerial.com/p/500x/ps0sh5sx/seoul-station-south-korean-movie-poster.jpg?v=1467970235",
+            "https://i.pinimg.com/564x/68/3a/33/683a333a00062940ca0bf03a7ab27770.jpg",
+            "https://cdn.mos.cms.futurecdn.net/8HQMVAtZ2LsatZQeWMscpF-1200-80.jpg",
+            "https://i.pinimg.com/736x/5b/a2/36/5ba236dbbd29c853af505b824defb285.jpg",
+            "https://i.pinimg.com/474x/54/f0/ea/54f0ea6af36893b8a72f00e9ba5045ce.jpg",
+            "https://i.pinimg.com/originals/88/00/b3/8800b3ff9675d12ce1ec039c2b838914.jpg",
+            "https://i.pinimg.com/originals/5a/06/82/5a06824e004d0ab1c67ec07426ca6428.jpg",
+            STATIC_IP_BASE + "/profiles/" + "image_picker570247212431073700.jpg",
+            STATIC_IP_BASE + "/profiles/" + "image_picker3411855106648442293.jpg",
+            STATIC_IP_BASE + "/profiles/" + "image_picker4151765500727569599.jpg",
+            STATIC_IP_BASE + "/profiles/" + "image_picker4490805024644911958.jpg",
+            STATIC_IP_BASE + "/profiles/" + "image_picker7462381290976944694.jpg",
+            STATIC_IP_BASE + "/profiles/" + "image_picker7794235855316216163.jpg",
+            STATIC_IP_BASE + "/profiles/" + "image_picker9222588166119286601.jpg",
+            STATIC_IP_BASE + "/profiles/" + "image_picker9222588166119286601.jpg",
+            STATIC_IP_BASE + "/profiles/" + "image_picker8156845359036178023.jpg",
+            "https://randomwordgenerator.com/img/picture-generator/54e0d6404e56aa14f1dc8460962e33791c3ad6e04e507440742a7ed09149c4_640.jpg",
+            "https://randomwordgenerator.com/img/picture-generator/55e5d1424951ab14f1dc8460962e33791c3ad6e04e50744172297ed2914cc2_640.jpg",
+            "https://randomwordgenerator.com/img/picture-generator/55e4d5474350b10ff3d8992cc12c30771037dbf852547849712a73d5954d_640.jpg",
+            "https://randomwordgenerator.com/img/picture-generator/57e7dc454f54ae14f1dc8460962e33791c3ad6e04e507440742a7ad19148cc_640.jpg",
+            "https://randomwordgenerator.com/img/picture-generator/53e7d4464d52aa14f1dc8460962e33791c3ad6e04e50774971267bd19549c6_640.jpg",
+            "https://randomwordgenerator.com/img/picture-generator/53e1d7444b52af14f1dc8460962e33791c3ad6e04e507440702d79d29048c4_640.jpg",
+            "https://randomwordgenerator.com/img/picture-generator/5fe0d7464a5ab10ff3d8992cc12c30771037dbf85254784d752f7add9e4f_640.jpg"
     );
 
     private final List<String> seedingMessages = List.of(
@@ -92,12 +125,12 @@ public class UserSeeder implements CommandLineRunner {
         try {
             log.info("Seeding country codes...");
             CountryCodeEntity countryCodeEntity = new CountryCodeEntity();
-            countryCodeEntity.setCountryName("Bosna i Hercegovina");
+            countryCodeEntity.setCountryName("Bosnia and Herzegovina");
             countryCodeEntity.setDialCode("+387");
             countryCodeEntity = countryCodeRepository.save(countryCodeEntity);
 
             CountryCodeEntity countryCodeEntity2 = new CountryCodeEntity();
-            countryCodeEntity2.setCountryName("Srbija");
+            countryCodeEntity2.setCountryName("Serbia");
             countryCodeEntity2.setDialCode("+381");
             countryCodeEntity2 = countryCodeRepository.save(countryCodeEntity2);
             log.info("Saved country codes {}", List.of(countryCodeEntity, countryCodeEntity2));
@@ -222,7 +255,17 @@ public class UserSeeder implements CommandLineRunner {
             for (int i = 0; i < 70; i++) {
                 String firstName = seedingFirstNames.get(random.nextInt(seedingFirstNames.size()));
                 String lastName = seedingLastNames.get(random.nextInt(seedingLastNames.size()));
-                String avatar = seedingAvatars.get(random.nextInt(seedingAvatars.size()));
+
+                String avatar;
+                if (i + 1 > seedingAvatars.size()) {
+                    URLConnection con = new URL("https://picsum.photos/400").openConnection();
+                    con.connect();
+                    InputStream is = con.getInputStream();
+                    avatar = con.getURL().toString();
+                    is.close();
+                } else {
+                    avatar = seedingAvatars.get(i);
+                }
                 int phoneNumber = (int)(Math.random() * (65999999 - 61000000 + 1) + 61000000);
 
                 UserEntity anotherUserEntity = new UserEntity();
@@ -232,9 +275,7 @@ public class UserSeeder implements CommandLineRunner {
                 anotherUserEntity.setLastName(lastName);
                 anotherUserEntity.setDisplayMyFullName(i % 2 == 0);
 
-                if (i < 50) {
-                    anotherUserEntity.setProfileImagePath(avatar);
-                }
+                anotherUserEntity.setProfileImagePath(avatar);
 
                 anotherUserEntity = userRepository.save(anotherUserEntity);
 
@@ -279,7 +320,7 @@ public class UserSeeder implements CommandLineRunner {
                         messageEntity.setReceiverContactName(anotherContactEntity2.getContactName());
                     }
 
-                    messageEntity.setSentTimestamp(Instant.now().minusSeconds(i * 100).toEpochMilli());
+                    messageEntity.setSentTimestamp(Instant.now().minus(i * 160, ChronoUnit.MINUTES).toEpochMilli());
                     messageEntity.setContactBindingId(anotherContactBindingId);
 
                     messageRepository.save(messageEntity);
