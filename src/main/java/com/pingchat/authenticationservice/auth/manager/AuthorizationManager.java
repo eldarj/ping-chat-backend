@@ -1,9 +1,7 @@
 package com.pingchat.authenticationservice.auth.manager;
 
+import com.pingchat.authenticationservice.auth.util.AuthenticationHolder;
 import com.pingchat.authenticationservice.auth.util.JwtTokenHandler;
-import com.pingchat.authenticationservice.data.mysql.entity.UserEntity;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +14,10 @@ public class AuthorizationManager {
         this.jwtTokenHandler = jwtTokenHandler;
     }
 
-    public String authorizeByToken(String token) {
-        return jwtTokenHandler.getSubject(token);
+    public AuthenticationHolder authorizeByToken(String token) {
+        return new AuthenticationHolder(
+                jwtTokenHandler.getPhoneNumber(token),
+                jwtTokenHandler.getUserId(token)
+        );
     }
 }

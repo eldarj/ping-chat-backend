@@ -23,15 +23,15 @@ public class JwtTokenHandler {
     private String secret;
     private String issuer;
 
-    public String generateToken(String subject, List<String> roles, String audience) {
+    public String generateToken(Long userId, String phoneNumber, List<String> roles, String audience) {
         return Jwts.builder()
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .setHeaderParam("typ", "JWT")
                 .setIssuer(issuer)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setAudience(audience)
-                .setSubject(subject)
-                .addClaims(Map.of("rol", roles))
+                .setSubject(phoneNumber)
+                .addClaims(Map.of("rol", roles, "userId", userId))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_VALID_FOR_MILLIS))
                 .compact();
     }
@@ -42,12 +42,20 @@ public class JwtTokenHandler {
                 .parseClaimsJws(bearerToken.replace("Bearer ", ""));
     }
 
-    public String getSubject(String bearerToken) {
+    public String getPhoneNumber(String bearerToken) {
         return Jwts.parser()
                 .setSigningKey(secret)
                 .parseClaimsJws(bearerToken.replace("Bearer ", ""))
                 .getBody()
                 .getSubject();
+    }
+
+    public Long getUserId(String bearerToken) {
+        return Jwts.parser()
+                .setSigningKey(secret)
+                .parseClaimsJws(bearerToken.replace("Bearer ", ""))
+                .getBody()
+                .get("userId", Long.class);
     }
 
     public boolean isValid(String bearerToken) {

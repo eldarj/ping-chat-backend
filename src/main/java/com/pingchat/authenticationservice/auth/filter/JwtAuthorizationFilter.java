@@ -44,13 +44,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         String token = httpRequest.getHeader("Authorization");
 
         if (!StringUtils.isBlank(token) && token.startsWith("Bearer ")) {
-            String userPhoneNumber = authorizationManager.authorizeByToken(token.replace("Bearer ", ""));
-            if (userPhoneNumber != null) {
-                SecurityContextHolder.getContext().setAuthentication(new AuthenticationHolder(userPhoneNumber));
+            AuthenticationHolder authentication = authorizationManager.authorizeByToken(token.replace("Bearer ", ""));
+
+            if (authentication != null) {
+                SecurityContextHolder.getContext().setAuthentication(authentication);
                 chain.doFilter(httpRequest, httpResponse);
                 return;
             }
-
 
             log.warn("Bearer token invalid or expired.");
         } else {

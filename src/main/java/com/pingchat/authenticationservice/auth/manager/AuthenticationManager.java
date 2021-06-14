@@ -97,7 +97,7 @@ public class AuthenticationManager {
                     userEntity.getPhoneNumber());
         }
 
-//        this.sendSmsTwoWayPin(userEntity);
+        this.sendSmsTwoWayPin(userEntity);
 
         return objectMapper.convertValue(userEntity, converToUserType);
     }
@@ -114,17 +114,17 @@ public class AuthenticationManager {
         }
 
         String jwtToken = jwtTokenHandler.generateToken(
-                userEntity.getCountryCode().getDialCode() + userEntity.getPhoneNumber(), Collections.emptyList(),
-                "taxi-app-audience");
+                userEntity.getId(),
+                userEntity.getCountryCode().getDialCode() + userEntity.getPhoneNumber(),
+                Collections.emptyList(),
+                "ping-app-audience");
 
         UserTokenEntity userTokenEntity = new UserTokenEntity();
         userTokenEntity.setToken(jwtToken);
         userTokenEntity.setUser(userEntity);
         userTokenEntity = userTokenRepository.save(userTokenEntity);
 
-        Map<String, Object> userTokenDto = objectMapper.convertValue(userTokenEntity, Map.class);
-
-        return userTokenDto;
+        return objectMapper.convertValue(userTokenEntity, Map.class);
     }
 
     private void sendSmsTwoWayPin(UserEntity userEntity) throws IOException, InterruptedException {
