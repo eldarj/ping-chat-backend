@@ -1,40 +1,26 @@
 package com.pingchat.authenticationservice.api.rest;
 
-import com.pingchat.authenticationservice.api.ws.MessagesWsController;
-import com.pingchat.authenticationservice.auth.util.SecurityContextUserProvider;
 import com.pingchat.authenticationservice.model.dto.MessageDto;
-import com.pingchat.authenticationservice.service.data.DataSpaceDataService;
 import com.pingchat.authenticationservice.service.data.MessageDataService;
-import com.pingchat.authenticationservice.service.files.StaticFileStorageService;
 import com.pingchat.authenticationservice.util.pagination.PagedSearchResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/messages")
 public class MessagesController {
     private final MessageDataService messageDataService;
-    private final StaticFileStorageService staticFileStorageService;
-    private final DataSpaceDataService dataSpaceDataService;
-    private final MessagesWsController messagesWsController;
 
-    public MessagesController(MessageDataService messageDataService,
-                              StaticFileStorageService staticFileStorageService,
-                              DataSpaceDataService dataSpaceDataService,
-                              MessagesWsController messagesWsController) {
+    public MessagesController(MessageDataService messageDataService) {
         this.messageDataService = messageDataService;
-        this.staticFileStorageService = staticFileStorageService;
-        this.dataSpaceDataService = dataSpaceDataService;
-        this.messagesWsController = messagesWsController;
     }
 
+    // Get chat messages
     @GetMapping
     public PagedSearchResult<MessageDto> findMessagesByUsers(@RequestParam Long userId,
                                                              @RequestParam Long contactUserId,
@@ -53,54 +39,36 @@ public class MessagesController {
         return userMessagesPage;
     }
 
+    // Get pinned messages
     @GetMapping("pinned")
     public List<MessageDto> findPinnedMessagesByUsers(@RequestParam Long userId,
                                                       @RequestParam Long contactUserId) {
         return messageDataService.findPinnedMessagesByUsers(userId, contactUserId);
     }
 
+    // Pin message
     @PostMapping("{messageId}/pin")
-    public void updatePinStatus(@PathVariable Long messageId, @RequestBody Boolean isPinned) {
+    public void updatePinStatus(@PathVariable Long messageId,
+                                @RequestBody Boolean isPinned) {
         messageDataService.updatePinnedStatus(messageId, isPinned);
     }
 
-    // TODO: Remove
-    @PostMapping("{messageId}")
-    public void updateMessage(@PathVariable Long messageId, @RequestBody String text) {
-        text = text.replaceAll("\"", "");
-        messageDataService.update(messageId, text);
-    }
-
-//    @DeleteMapping("{messageId}")
-//    public void deleteById(@PathVariable Long messageId) {
-//        MessageDto messageDto = messageDataService.findById(messageId);
-//        messageDataService.setDeleted(messageId);
-//        messagesWsController.messageDeleted(messageDto);
-//
-//        Long nodeId = messageDto.getNodeId();
-//        if (nodeId != null) {
-//            if (Objects.equals(messageDto.getSender().getFullPhoneNumber(),
-//                    SecurityContextUserProvider.currentUserPrincipal())) {
-//                dataSpaceDataService.setOwnerDeletedById(nodeId);
-//                try {
-//                    staticFileStorageService.delete(messageDto.getFileName());
-//                } catch (IOException e) {
-//                    log.warn("Error deleting file: {}", messageDto.getFilePath());
-//                }
-//            } else {
-//                dataSpaceDataService.setReceiverDeletedById(nodeId);
-//            }
-//        }
-//    }
-
+    // Delete single message
     @DeleteMapping("{messageId}")
-    public void deleteById(@PathVariable Long messageId, @RequestParam Long userId) {
-        messageDataService.deleteForUser(messageId, userId);
+    public void deleteById(@PathVariable Long messageId,
+                           @RequestParam Long userId,
+                           @RequestParam(required = false) Boolean deleteForEveryone) {
+        if (deleteForEveryone != null && deleteForEveryone) {
+            messageDataService.deleteForEveryone(messageId);
+        } else {
+            messageDataService.deleteForUser(messageId, userId);
+        }
     }
 
+    // Delete all messages by contact
     @DeleteMapping
-    public void deleteByContact(@RequestParam Long contactBindingId,
-                                @RequestParam Long userId) {
+    public void deleteByContact(@RequestParam Long userId,
+                                @RequestParam Long contactBindingId) {
         messageDataService.deleteAllForUser(contactBindingId, userId);
     }
 }
